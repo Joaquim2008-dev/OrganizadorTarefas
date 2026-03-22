@@ -1,0 +1,628 @@
+/* -------------- CSS GLOBAL (index.html) -------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* -------------- Template: tarefas.html -------------- */
+#calendar {
+    max-width: 750px;
+    margin: 30px auto 40px;
+    padding: 16px;
+    background: linear-gradient(135deg, #e6eeff 0%, #d7e7ff 100%);
+    border: 1px solid #a8c7ff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(31, 76, 185, 0.15);
+}
+
+.fc .fc-daygrid-day-frame {
+    background-color: #f8fbff;
+    border: 1px solid #d6e7ff;
+    border-radius: 8px;
+}
+
+.fc .fc-toolbar-title {
+    color: #1f4cb9;
+    font-weight: 700;
+}
+
+.fc .fc-button {
+    color: #ffffff !important;
+    font-weight: 700;
+    background: #1f4cb9;
+    border-color: #1f4cb9;
+}
+
+.fc .fc-button,
+.fc .fc-prev-button,
+.fc .fc-next-button,
+.fc .fc-planejarBtn-button {
+    color: #ffffff !important;
+    background: #1f4cb9;
+    border-color: #1f4cb9;
+}
+
+
+.fc .fc-button,
+.fc .fc-prev-button,
+.fc .fc-next-button,
+.fc .fc-planejarBtn-button {
+    min-width: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fc .fc-button-primary:hover,
+.fc .fc-prev-button:hover,
+.fc .fc-next-button:hover,
+.fc .fc-planejarBtn-button:hover {
+    background: #1441a5;
+    border-color: #0f3790;
+    color: #fff !important;
+}
+
+.fc .fc-button .fc-icon,
+.fc .fc-button .fc-icon svg {
+    fill: #ffffff;
+}
+
+
+/* -------------- Template: planejador.html -------------- */
+.planejador-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, .45);
+}
+
+.planejador-modal.hidden {
+    display: none;
+}
+
+.planejador-modal-content {
+    width: min(90vw, 520px);
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 18px 30px rgba(31, 76, 185, .3);
+}
+
+.modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #1f4cb9;
+    color: #fff;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#modal-tarefas {
+    max-height: 220px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+}
+
+.task-card {
+    border: 1px solid #d7e2ff;
+    background: #eef4ff;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+}
+
+.modal-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-controls input {
+    width: 72px;
+}
+
+/* -------------- Template: adicionar_tarefa.html -------------- */
+.form-add {
+    max-width: 680px;
+    margin: 24px auto;
+    padding: 20px;
+    border: 1px solid #8ab6ff;
+    border-radius: 10px;
+    background-color: #eef4ff;
+}
+
+.form-add h1 {
+    color: #1f4cb9;
+    margin-bottom: 16px;
+}
+
+.form-add .form-group {
+    margin-bottom: 14px;
+}
+
+.form-add label {
+    display: block;
+    font-weight: 600;
+    color: #1f4cb9;
+    margin-bottom: 4px;
+}
+
+.form-add input,
+.form-add textarea,
+.form-add select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #95b7ff;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #1a1d22;
+}
+
+.form-add .btn-blue {
+    border: 0;
+    background-color: #1f4cb9;
+    color: #ffffff;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.form-add .btn-blue:hover {
+    background-color: #1441a5;
+}
+
+/* -------------- Template: planejador.html -------------- */
+.planejador-container {
+    max-width: 1150px;
+    margin: 24px auto;
+    padding: 18px;
+    background: #eef4ff;
+    border: 1px solid #c7d8ff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(31, 76, 185, 0.15);
+}
+
+.cronograma-wrapper {
+    overflow-x: auto;
+    margin-top: 16px;
+}
+
+.cronograma-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f8fbff;
+    border: 1px solid #b8ceff;
+}
+
+.cronograma-table th,
+.cronograma-table td {
+    border: 1px solid #d6e7ff;
+    padding: 8px 10px;
+    text-align: center;
+}
+
+.cronograma-table th {
+    background: #1f4cb9;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.cronograma-table td.hora-label {
+    background: #dce7ff;
+    font-weight: 600;
+    color: #173f8f;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+}
+
+.cronograma-table td.celula-hora {
+    min-height: 32px;
+    background: #fff;
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease;
+    padding: 4px;
+}
+
+.cronograma-table td.celula-hora .cell-content {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 6px;
+    min-height: 28px;
+}
+
+.cronograma-table td.celula-hora .cell-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    min-width: 0;
+}
+
+.cronograma-table td.celula-hora .cell-task-item {
+    background: #d4e4ff;
+    color: #132f79;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background 120ms ease;
+}
+
+.cronograma-table td.celula-hora .cell-task-item:hover {
+    background: #b0cbff;
+}
+
+.cell-add-btn {
+    border: 0;
+    background: #2f9f4d;
+    color: #fff;
+    height: 24px;
+    width: 24px;
+    min-width: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.cell-add-btn:hover {
+    background: #1f8a3f;
+}
+
+.btn-danger {
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background: #a93226;
+}
+
+.detalhe-label {
+    color: #555;
+    margin: 6px 0 16px;
+}
+
+.cronograma-table tbody tr:nth-child(-n+7) td.celula-hora {
+    background: #eff7ff;
+}
+
+.cronograma-table tbody tr:nth-child(n+8):nth-child(-n+13) td.celula-hora {
+    background: #e4efff;
+}
+
+.cronograma-table tbody tr:nth-child(n+14):nth-child(-n+17) td.celula-hora {
+    background: #d9e7ff;
+}
+
+/* -------------- Template: tarefa_especific.html -------------- */
+.tarefa-container {
+    max-width: 1150px;
+    margin: 24px auto;
+    padding: 18px;
+    background-color: #f6f9ff;
+    border: 1px solid #c7d8ff;
+    border-radius: 12px;
+    box-shadow: 0 10px 22px rgba(31, 76, 185, 0.12);
+}
+
+.tarefa-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.btn-add,
+.btn-back {
+    display: inline-block;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all 0.25s ease;
+}
+
+.btn-add {
+    background: linear-gradient(135deg, #0f63d8 0%, #3469e0 100%);
+    color: white;
+}
+
+.btn-add:hover {
+    background: linear-gradient(135deg, #0a52bd 0%, #275ec9 100%);
+    box-shadow: 0 6px 14px rgba(49, 99, 192, 0.3);
+}
+
+.btn-back {
+    background: #ffffff;
+    color: #1f4cb9;
+    border-color: #a8c1ff;
+}
+
+.btn-back:hover {
+    background: #e7f0ff;
+    border-color: #6e99eb;
+}
+
+.btn-start {
+    background: #1e6de6;
+    color: #ffffff;
+    border-color: #185fbf;
+}
+
+.btn-start:hover {
+    background: #1556c3;
+    border-color: #134d9f;
+    box-shadow: 0 4px 10px rgba(11, 71, 150, 0.28);
+}
+
+.btn-delete {
+    background: #fff1f1;
+    color: #d04545;
+    border-color: #e3b5b5;
+    font-size: 0.95rem;
+    padding: 6px 10px;
+    margin-left: 6px;
+}
+
+.btn-delete:hover {
+    background: #fdd7d7;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.tarefas-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+    background: white;
+    border: 1px solid #d7e0ff;
+    border-radius: 10px;
+    box-shadow: 0 8px 18px rgba(31, 76, 185, 0.08);
+}
+
+
+.tarefas-table th,
+.tarefas-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #e4ecff;
+    text-align: left;
+}
+
+.tarefas-table th {
+    background: linear-gradient(90deg, #2b61d7 0%, #4e86ed 100%);
+    color: #ffffff;
+    letter-spacing: 0.03em;
+    font-weight: 700;
+}
+
+.tarefas-table tr:nth-child(even) {
+    background: #f6f9ff;
+}
+
+.tarefas-table tbody tr:hover {
+    background: #e9f0ff;
+}
+
+.tarefas-table td:last-child {
+    color: #1a2f5f;
+    font-weight: 500;
+}
+
+.descricao-t {
+    max-width: 280px;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
+
+/* -------------- Template: horas_tarefa.html -------------- */
+.horas-container {
+    max-width: 1150px;
+    margin: 24px auto;
+    padding: 18px;
+    background-color: #f6f9ff;
+    border: 1px solid #c7d8ff;
+    border-radius: 12px;
+    box-shadow: 0 10px 22px rgba(31, 76, 185, 0.12);
+}
+
+.tarefa-detalhes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 16px;
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #d9e6ff;
+    margin-bottom: 16px;
+}
+
+.detalhe-item {
+    min-width: 180px;
+    flex: 1 1 150px;
+}
+
+.detalhe-item h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.2;
+}
+
+.detalhe-item h2 small {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: #667085;
+    margin-bottom: 4px;
+}
+
+.item-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #5f6f88;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.detalhe-item span {
+    font-weight: 600;
+    color: #1d2a4a;
+}
+
+.prioridade-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    color: white;
+    font-weight: 700;
+}
+
+.prioridade-badge.ba {
+    background-color: #2f8f3f;
+}
+
+.prioridade-badge.me {
+    background-color: #f2b700;
+    color: #1f2f39;
+}
+
+.prioridade-badge.al {
+    background-color: #dc2626;
+}
+
+.actions-row {
+    display: flex;
+    justify-content: flex-start;
+    gap: 12px;
+}
+
+.contador {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    margin-top: 16px;
+}
+
+.relogio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #e8efff;
+    border: 1px solid #aac8ff;
+    border-radius: 14px;
+    padding: 20px 24px;
+    min-width: 320px;
+}
+
+.relogio h3 {
+    margin: 0;
+    color: #1f4cb9;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.95rem;
+}
+
+.relogio h1 {
+    margin: 8px 0 0;
+    font-size: 4.5rem;
+    line-height: 1;
+    color: #1e4fc6;
+    font-weight: 800;
+}
+
+.escolher_tempo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+}
+
+.escolher_tempo label {
+    font-size: 0.85rem;
+    color: #2557b8;
+    font-weight: 600;
+}
+
+.escolher_tempo input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #95b7ff;
+    border-radius: 8px;
+    font-weight: 700;
+    color: #1a2a54;
+}
+
+.painel {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 440px;
+}
+
+.btn-cont {
+    border: 0;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    min-width: 104px;
+    text-transform: uppercase;
+}
+
+.btn-iniciar {
+    background: #1f4cb9;
+}
+
+.btn-pausar {
+    background: #5b82e2;
+}
+
+.btn-resetar {
+    background: #2f7ed9;
+}
+
+.btn-finalizar {
+    background: #244f9e;
+}
+
+.btn-cont:hover {
+    filter: brightness(1.06);
+}
