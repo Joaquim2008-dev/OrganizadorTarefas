@@ -28,9 +28,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['.onrender.com']
+ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -81,10 +81,10 @@ WSGI_APPLICATION = 'Organizador.wsgi.application'
 
 DATABASES = {
     'default':
-     dj_database_url.config(
+    dj_database_url.config(
         default='sqlite:///db.sqlite3'
     )
-    
+
 }
 
 

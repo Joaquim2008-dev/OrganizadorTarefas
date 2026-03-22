@@ -15,7 +15,15 @@
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: ''
+                right: 'planejarBtn'
+            },
+            customButtons: {
+                planejarBtn: {
+                    text: 'Planejar',
+                    click: function () {
+                        window.location.href = "{% url 'planejador' %}";
+                    }
+                }
             },
             locale: 'pt-br',
             showNonCurrentDates: false,

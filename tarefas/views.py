@@ -1,11 +1,12 @@
 import json
+import calendar as cal_module
 from decimal import Decimal
 from datetime import datetime, date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import Tarefa
+from .models import Tarefa, EntradaPlanejador
 
 
 def home(request):
@@ -14,6 +15,21 @@ def home(request):
 
 def tarefas(request):
     return render(request, 'tarefas.html')
+
+
+def planejador(request):
+    context = {
+        'dias': range(7),
+        'periodos': [
+            {'nome': 'Manhã',  'label': '5h–12h',
+                'chave': 'manha', 'horas': range(5, 12)},
+            {'nome': 'Tarde',  'label': '12h–18h',
+                'chave': 'tarde', 'horas': range(12, 18)},
+            {'nome': 'Noite',  'label': '18h–22h',
+                'chave': 'noite', 'horas': range(18, 22)},
+        ]
+    }
+    return render(request, 'planejador.html', context)
 
 
 def tarefa_especifica(request, data=None):
@@ -90,6 +106,108 @@ def api_tarefas_por_data(request):
     tarefas = list(Tarefa.objects.filter(data=data_obj).values(
         'id', 'nome', 'descricao', 'horas_estimadas', 'horas_trabalhadas'))
     return JsonResponse({'success': True, 'data': data_str, 'tarefas': tarefas})
+
+
+def api_dias_semana_no_mes(request):
+    dia_str = request.GET.get('dia')
+    mes_str = request.GET.get('mes')
+
+    if dia_str is None:
+        return JsonResponse({'success': False, 'error': 'Parâmetro dia ausente'}, status=400)
+
+    if mes_str is None:
+        hoje = date.today()
+        mes_str = f"{hoje.year}-{hoje.month:02d}"
+
+    try:
+        dia_semana = int(dia_str)
+        ano, mes = map(int, mes_str.split('-'))
+        date(ano, mes, 1)  # valida ano/mês
+    except (ValueError, TypeError):
+        return JsonResponse({'success': False, 'error': 'Parâmetros inválidos'}, status=400)
+
+    if not (0 <= dia_semana <= 6):
+        return JsonResponse({'success': False, 'error': 'Dia da semana inválido'}, status=400)
+
+    semanas = cal_module.monthcalendar(ano, mes)
+    datas = [
+        date(ano, mes, semana[dia_semana]).strftime('%Y-%m-%d')
+        for semana in semanas
+        if semana[dia_semana] != 0
+    ]
+
+    return JsonResponse({'success': True, 'datas': datas})
+
+
+def api_entradas_planejador(request):
+    entradas = EntradaPlanejador.objects.select_related('tarefa').all()
+    result = []
+    for e in entradas:
+        result.append({
+            'id': e.id,
+            'dia_semana': e.dia_semana,
+            'periodo': e.periodo,
+            'hora': e.hora,
+            'tarefa': {
+                'id': e.tarefa.id,
+                'nome': e.tarefa.nome,
+                'descricao': e.tarefa.descricao,
+                'prioridade': e.tarefa.get_prioridade_display(),
+                'horas_estimadas': float(e.tarefa.horas_estimadas),
+                'horas_trabalhadas': float(e.tarefa.horas_trabalhadas),
+            }
+        })
+    return JsonResponse({'success': True, 'entradas': result})
+
+
+@require_POST
+def api_adicionar_entrada_planejador(request):
+    try:
+        payload = json.loads(request.body)
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
+
+    tarefa_id = payload.get('tarefa_id')
+    dia_semana = payload.get('dia_semana')
+    periodo = payload.get('periodo')
+    hora = payload.get('hora')
+
+    if tarefa_id is None or dia_semana is None or periodo is None or hora is None:
+        return JsonResponse({'success': False, 'error': 'Dados incompletos'}, status=400)
+
+    try:
+        dia_semana = int(dia_semana)
+        hora = int(hora)
+    except (TypeError, ValueError):
+        return JsonResponse({'success': False, 'error': 'Parâmetros inválidos'}, status=400)
+
+    if not (0 <= dia_semana <= 6):
+        return JsonResponse({'success': False, 'error': 'Dia da semana inválido'}, status=400)
+
+    if periodo not in ('manha', 'tarde', 'noite'):
+        return JsonResponse({'success': False, 'error': 'Período inválido'}, status=400)
+
+    tarefa = get_object_or_404(Tarefa, id=tarefa_id)
+    entrada, created = EntradaPlanejador.objects.get_or_create(
+        tarefa=tarefa, dia_semana=dia_semana, periodo=periodo, hora=hora
+    )
+    return JsonResponse({'success': True, 'created': created, 'entrada_id': entrada.id})
+
+
+@require_POST
+def api_remover_entrada_planejador(request):
+    try:
+        payload = json.loads(request.body)
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
+
+    entrada_id = payload.get('entrada_id')
+    if entrada_id is None:
+        return JsonResponse({'success': False, 'error': 'Dados incompletos'}, status=400)
+
+    entrada = get_object_or_404(EntradaPlanejador, id=entrada_id)
+    entrada.delete()
+    return JsonResponse({'success': True})
 
 
 def adicionar_tarefa(request, data=None):
