@@ -1,0 +1,44 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div id="calendar"></div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: ''
+            },
+            locale: 'pt-br',
+            showNonCurrentDates: false,
+            events: [
+
+            ],
+            editable: true,
+            selectable: true,
+            selectMirror: true,
+            dayMaxEvents: true,
+            select: function (info) {
+                const data = info.startStr
+                const targetBase  = "{% url 'tarefa_especifica' '0000-00-00' %}".replace('0000-00-00',encodeURIComponent(data));
+                window.location.href = targetBase;
+                calendar.unselect();
+            },
+            eventClick: function (info) {
+
+            }
+        });
+
+        calendar.render();
+    });
+</script>
+
+{% endblock %}

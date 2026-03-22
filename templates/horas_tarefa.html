@@ -1,0 +1,174 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<h1>Horas da Tarefa</h1>
+
+<section class='horas-container'>
+  <header class='tarefa-detalhes'>
+    <div class='detalhe-item'>
+      <small class='item-label'>Tarefa</small>
+      <h2>{{ tarefa.nome }}</h2>
+    </div>
+
+    <div class='detalhe-item'>
+      <small class='item-label'>Prioridade</small>
+      <span class='prioridade-badge {{ tarefa.prioridade|lower }}'>{{ tarefa.get_prioridade_display }}</span>
+    </div>
+
+    <div class='detalhe-item'>
+      <small class='item-label'>Horas estimadas</small>
+      <span>{{ tarefa.horas_estimadas }}</span>
+    </div>
+  </header>
+
+  <main>
+    <section class='contador'>
+      <div class="relogio">
+        <h3>Tempo restante</h3>
+        <h1 id="time"></h1>
+      </div>
+
+      <div class="escolher_tempo">
+        <label for="tempo-minutos">Definir tempo (minutos)</label>
+        <input type="number" id="tempo-minutos" min="1" max="999" value="45" />
+      </div>
+
+      <div class="painel">
+        <button type="button" class="btn-cont btn-iniciar">Iniciar</button>
+        <button type="button" class="btn-cont btn-pausar">Pausar</button>
+        <button type="button" class="btn-cont btn-resetar">Resetar</button>
+        <button type="button" class="btn-cont btn-finalizar">Finalizar</button>
+      </div>
+    </section>
+  </main>
+
+  <div class='actions-row'>
+    <a href="{% url 'tarefa_especifica' tarefa.data %}" class="btn-back">Voltar</a>
+  </div>
+</section>
+
+<script>
+  /* ====== Elementos do DOM ====== */
+  const btnIniciar = document.querySelector('.btn-iniciar')
+  const btnPausar = document.querySelector('.btn-pausar')
+  const btnResetar = document.querySelector('.btn-resetar')
+  const tempoMinutosInput = document.getElementById('tempo-minutos')
+  const timeDisplay = document.getElementById('time')
+
+  /* ====== Estado do cronômetro ====== */
+  let intervaloId = null
+  let segundosTotais = Number(tempoMinutosInput.value) * 60
+  let segundosRestantes = segundosTotais
+
+  /* ====== Helpers ====== */
+  function formatarTempo(segundos) {
+    const min = String(Math.floor(segundos / 60)).padStart(2, '0')
+    const sec = String(segundos % 60).padStart(2, '0')
+    return `${min}:${sec}`
+  }
+
+  function atualizarDisplay() {
+    timeDisplay.textContent = formatarTempo(segundosRestantes)
+  }
+
+  function atualizarTempoTotal() {
+    const minutos = Number(tempoMinutosInput.value)
+    segundosTotais = Number.isFinite(minutos) && minutos > 0 ? minutos * 60 : 0
+    segundosRestantes = segundosTotais
+    atualizarDisplay()
+  }
+
+  /* ====== Inicialização ====== */
+  atualizarTempoTotal()
+
+  tempoMinutosInput.addEventListener('input', () => {
+    atualizarTempoTotal()
+  })
+
+  /* ====== Controle do cronômetro ====== */
+  function iniciarCronometro() {
+    if (intervaloId !== null) return // já está em execução
+
+    intervaloId = setInterval(() => {
+      if (segundosRestantes <= 0) {
+        clearInterval(intervaloId)
+        intervaloId = null
+        return
+      }
+
+      segundosRestantes -= 1
+      atualizarDisplay()
+    }, 1000)
+  }
+
+  function pausarCronometro() {
+    if (intervaloId !== null) {
+      clearInterval(intervaloId)
+      intervaloId = null
+    }
+  }
+
+  function resetarCronometro() {
+    pausarCronometro()
+    atualizarTempoTotal()
+  }
+
+  /* ====== Finalizar tarefa ====== */
+  const btnFinalizar = document.querySelector('.btn-finalizar')
+  const tarefaId = {{ tarefa.id }}
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`
+    const parts = value.split(`; ${name}=`)
+    if (parts.length === 2) return parts.pop().split(';').shift()
+    return ''
+  }
+
+  function enviarTempoTrabalhado(tempoSegundos) {
+    const tempoMinutos = Number((tempoSegundos / 60).toFixed(2))
+
+    return fetch('{% url "api-guadar-tempo-gasto" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken'),
+      },
+      body: JSON.stringify({
+        tarefa_id: tarefaId,
+        tempo_minutos: tempoMinutos,
+      }),
+    }).then(response => response.json())
+  }
+
+  btnFinalizar.addEventListener('click', () => {
+    const confirmar = window.confirm('Deseja realmente concluir a tarefa?')
+    if (!confirmar) return
+
+    const tempoGastoSegundos = segundosTotais - segundosRestantes
+    if (tempoGastoSegundos < 0) {
+      alert('Erro no cálculo do tempo gasto. Por favor, reinicie o cronômetro.')
+      return
+    }
+
+    enviarTempoTrabalhado(tempoGastoSegundos)
+      .then(data => {
+        if (data.success) {
+          alert('Tempo registrado com sucesso.')
+          pausarCronometro()
+          resetarCronometro()
+        } else {
+          alert('Falha ao registrar tempo: ' + (data.error || 'erro desconhecido'))
+        }
+      })
+      .catch(() => {
+        alert('Erro de conexão ao enviar o tempo.')
+      })
+  })
+
+  /* ====== Eventos ====== */
+  btnIniciar.addEventListener('click', iniciarCronometro)
+  btnPausar.addEventListener('click', pausarCronometro)
+  btnResetar.addEventListener('click', resetarCronometro)
+</script>
+
+{% endblock %}

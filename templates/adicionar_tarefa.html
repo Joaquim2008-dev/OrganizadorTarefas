@@ -1,0 +1,39 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<a href="{% if data %}{% url 'tarefa_especifica' data %}{% else %}{% url 'tarefa_especifica' '1970-01-01' %}{% endif %}" class="btn-back">Voltar</a>
+  <section class="form-add">
+    <h1>Adicionar Tarefa</h1>
+
+    <form method="post" action="">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="nome">Nome</label>
+        <input id="nome" name="nome" type="text" required>
+      </div>
+
+      <div class="form-group">
+        <label for="descricao">Descrição</label>
+        <textarea id="descricao" name="descricao" rows="4"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="prioridade">Prioridade</label>
+        <select id="prioridade" name="prioridade" required>
+          <option value="BA">Baixa</option>
+          <option value="ME" selected>Média</option>
+          <option value="AL">Alta</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="horas_estimadas">Horas estimadas</label>
+        <input id="horas_estimadas" name="horas_estimadas" type="number" step="0.25" min="0" required>
+      </div>
+
+      <input type="hidden" name="data" value="{{ data }}">
+
+      <button type="submit" class="btn-blue">Salvar tarefa</button>
+    </form>
+  </section>
+{% endblock %}

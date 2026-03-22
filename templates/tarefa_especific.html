@@ -1,0 +1,112 @@
+{% extends 'index.html' %}
+
+{% block content %}
+  <h1>Tarefa Específica {{data}}</h1>
+
+ <!--Organizar tarefa-->
+ <section class='tarefa-container'>
+    <div class='tarefa-actions'>
+      <div class='back'>
+        <a href="{% url 'tarefas' %}" class="btn-back">Voltar</a>
+      </div>
+      <div class='addTask'>
+        {% if datas %}
+          <a href="{% url 'adicionar_tarefa' datas %}" class='btn-add'>+ Tarefa</a>
+        {% else %}
+          <a href="{% url 'adicionar_tarefa' '1970-01-01' %}" class='btn-add'>+ Tarefa</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class='table-wrapper'>
+      <table class='tarefas-table'>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Prioridade</th>
+            <th>Horas estimadas</th>
+            <th>Horas trabalhadas</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tarefa in tarefas %}
+            <tr data-tarefa-id="{{ tarefa.id }}">
+              <td>{{ tarefa.nome }}</td>
+              <td class='descricao-t'>{{ tarefa.descricao }}</td>
+              <td>{{ tarefa.get_prioridade_display }}</td>
+              <td>{{ tarefa.horas_estimadas }}</td>
+              <td>{{ tarefa.horas_trabalhadas }}</td>
+              <td>
+                <a href="{% url 'horas_tarefa' tarefa.id %}" class="btn-start">Start</a>
+                <button type="button" class="btn-delete" data-id="{{ tarefa.id }}">🗑️</button>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" style="text-align:center;">Nenhuma tarefa cadastrada para essa data</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+ </section>
+
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const token = getCookie('csrftoken');
+    document.querySelectorAll('.btn-delete').forEach(button => {
+      button.addEventListener('click', function () {
+        const tarefaId = this.dataset.id;
+        if (!tarefaId) return;
+
+        if (!confirm('Tem certeza que deseja excluir ?')) {
+          return;
+        }
+
+        const url = '{% url "deletar_tarefa" 0 %}'.replace('0', tarefaId);
+
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': token,
+          },
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              const row = document.querySelector(`tr[data-tarefa-id="${tarefaId}"]`);
+              if (row) {
+                row.remove();
+              }
+            } else {
+              alert('Não foi possível deletar a tarefa.');
+            }
+          })
+          .catch(err => {
+            console.error(err);
+            alert('Ocorreu um erro ao tentar excluir.');
+          });
+      });
+    });
+  });
+</script>
+
+{% endblock %}
