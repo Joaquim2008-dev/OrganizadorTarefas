@@ -7,7 +7,7 @@
     <title>Organizador - Tarefas</title>
     <link rel="stylesheet" href="{% static 'css/estilo.css' %}">
 </head>
-<body>
+<body data-tarefa-data="{{ data|date:'Y-m-d' }}">
   <header>
 
   </header>
@@ -17,5 +17,10 @@
   <footer>
 
   </footer>
+  <script src="{% static 'js/js_tarefa_cronograma/utils.js' %}"></script>
+  <script src="{% static 'js/js_tarefa_cronograma/load-tasks.js' %}"></script>
+  <script src="{% static 'js/js_tarefa_cronograma/delete-tarefa.js' %}"></script>
+  <script src="{% static 'js/js_tarefa_cronograma/save-tarefa.js' %}"></script>
+  <script src="{% static 'js/js_tarefa_cronograma/main.js' %}"></script>
 </body>
 </html>

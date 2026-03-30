@@ -1,6 +1,9 @@
 {% extends 'index.html' %}
 
+
 {% block content %}
+
+
 <div id="calendar"></div>
 
 
@@ -15,33 +18,31 @@
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'planejarBtn'
+                right: 'AddBtn'
             },
             customButtons: {
-                planejarBtn: {
-                    text: 'Planejar',
+                AddBtn: {
+                    text:'+Tarefa',
                     click: function () {
-                        window.location.href = "{% url 'planejador' %}";
+                        window.location.href = "{% url 'adicionar_tarefa' %}";
                     }
-                }
+                },
             },
             locale: 'pt-br',
             showNonCurrentDates: false,
             events: [
-
             ],
             editable: true,
             selectable: true,
             selectMirror: true,
             dayMaxEvents: true,
             select: function (info) {
-                const data = info.startStr
-                const targetBase  = "{% url 'tarefa_especifica' '0000-00-00' %}".replace('0000-00-00',encodeURIComponent(data));
-                window.location.href = targetBase;
+                var date = info.startStr;
+                window.location.href = "{% url 'tarefa_especifica' '0000-00-00' %}".replace('0000-00-00', encodeURIComponent(date));
                 calendar.unselect();
             },
             eventClick: function (info) {
-
+                // não usado aqui
             }
         });
 

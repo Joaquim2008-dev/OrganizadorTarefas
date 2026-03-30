@@ -1,112 +1,132 @@
 {% extends 'index.html' %}
 
 {% block content %}
-  <h1>Tarefa Específica {{data}}</h1>
-
- <!--Organizar tarefa-->
- <section class='tarefa-container'>
-    <div class='tarefa-actions'>
-      <div class='back'>
-        <a href="{% url 'tarefas' %}" class="btn-back">Voltar</a>
-      </div>
-      <div class='addTask'>
-        {% if datas %}
-          <a href="{% url 'adicionar_tarefa' datas %}" class='btn-add'>+ Tarefa</a>
-        {% else %}
-          <a href="{% url 'adicionar_tarefa' '1970-01-01' %}" class='btn-add'>+ Tarefa</a>
-        {% endif %}
-      </div>
-    </div>
-
-    <div class='table-wrapper'>
-      <table class='tarefas-table'>
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Descrição</th>
-            <th>Prioridade</th>
-            <th>Horas estimadas</th>
-            <th>Horas trabalhadas</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for tarefa in tarefas %}
-            <tr data-tarefa-id="{{ tarefa.id }}">
-              <td>{{ tarefa.nome }}</td>
-              <td class='descricao-t'>{{ tarefa.descricao }}</td>
-              <td>{{ tarefa.get_prioridade_display }}</td>
-              <td>{{ tarefa.horas_estimadas }}</td>
-              <td>{{ tarefa.horas_trabalhadas }}</td>
-              <td>
-                <a href="{% url 'horas_tarefa' tarefa.id %}" class="btn-start">Start</a>
-                <button type="button" class="btn-delete" data-id="{{ tarefa.id }}">🗑️</button>
-              </td>
-            </tr>
-          {% empty %}
-            <tr>
-              <td colspan="6" style="text-align:center;">Nenhuma tarefa cadastrada para essa data</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
- </section>
-
 <script>
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
+  const dia_tarefas = [
+    {% for dt in dia_tarefas %}
+    {
+      id: {{ dt.id }},
+      tarefa_id: {{ dt.tarefa.id }},
+      tarefa_nome: "{{ dt.tarefa.nome|escapejs }}",
+      data: "{{ dt.data|date:'Y-m-d' }}",
+      hora_cronograma: "{{ dt.hora_cronograma|escapejs }}"
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ];
+</script>
+
+<style>
+  dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    border: none;
+    border-radius: 12px;
+    padding: 1rem;
+    background: #ffffff;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+    min-width: 300px;
+    max-width: 90vw;
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
-    const token = getCookie('csrftoken');
-    document.querySelectorAll('.btn-delete').forEach(button => {
-      button.addEventListener('click', function () {
-        const tarefaId = this.dataset.id;
-        if (!tarefaId) return;
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.35);
+  }
 
-        if (!confirm('Tem certeza que deseja excluir ?')) {
-          return;
-        }
+  #tarefa-busca {
+    width: 100%;
+    padding: 0.68rem;
+    border: 1.8px solid #1f4cb9;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    margin: 0.35rem 0 0.65rem;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
 
-        const url = '{% url "deletar_tarefa" 0 %}'.replace('0', tarefaId);
+  #tarefa-busca:focus {
+    outline: none;
+    border-color: #1441a5;
+    box-shadow: 0 0 8px rgba(31, 76, 185, 0.3);
+  }
 
-        fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': token,
-          },
-        })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              const row = document.querySelector(`tr[data-tarefa-id="${tarefaId}"]`);
-              if (row) {
-                row.remove();
-              }
-            } else {
-              alert('Não foi possível deletar a tarefa.');
-            }
-          })
-          .catch(err => {
-            console.error(err);
-            alert('Ocorreu um erro ao tentar excluir.');
-          });
-      });
-    });
-  });
-</script>
+  .lista-tarefas {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #c7d8ff;
+    border-radius: 8px;
+    max-height: 260px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: none;
+  }
+
+  .item-tarefa {
+    padding: 0.62rem 0.8rem;
+    border-bottom: 1px solid #eef4ff;
+    cursor: pointer;
+  }
+
+  .item-tarefa:last-child {
+    border-bottom: none;
+  }
+
+  .item-tarefa:hover {
+    background: #eef4ff;
+  }
+
+  .nenhuma-tarefa {
+    padding: 0.8rem;
+    color: #667085;
+    font-style: italic;
+  }
+
+  .dialog-actions {
+    margin-top: 1rem;
+    text-align: right;
+  }
+</style>
+<h1>Tarefa Específica {{data}}</h1>
+
+<section class="cronograma-estudos">
+  <h2>Cronograma de Estudos</h2>
+  <p>Manhã: 5h–12h</p>
+  <div class="cronograma-table-wrapper">
+    <table class="cronograma-table">
+      <thead>
+        <tr>
+          <th>Horário</th>
+          <th class="atividade-task">Atividade</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for hora in horarios %}
+        <tr>
+          <td>{{ hora }}h - {{ hora|add:1 }}h</td>
+          <td class="task-cron" id='tarefa'></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+<dialog id="tarefa-modal">
+  <h1>Selecionar tarefa</h1>
+  <label for="tarefa-busca">Buscar tarefa</label>
+  <input id="tarefa-busca" type="text" placeholder="Digite parte do nome..." autofocus />
+  <ul id="resultado-tarefas" class="lista-tarefas">
+    {% for tarefa in tarefas %}
+    <li class="item-tarefa" data-id="{{ tarefa.id }}" data-nome="{{ tarefa.nome|escape }}">
+      {{ tarefa.nome }} <small>({{ tarefa.get_prioridade_display }})</small>
+    </li>
+    {% endfor %}
+    <li class="nenhuma-tarefa" style="display: none">Digite para ver tarefas correspondentes.</li>
+  </ul>
+  <div class="dialog-actions">
+    <button type="button" id="fechar-modal">Fechar</button>
+  </div>
+</dialog>
 
 {% endblock %}

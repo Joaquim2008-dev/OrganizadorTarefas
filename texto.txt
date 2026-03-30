@@ -1,12 +1,126 @@
 /* -------------- CSS GLOBAL (index.html) -------------- */
 body {
     background: #000;
+    color: #fff;
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+/* -------------- Template: planejador.html — new components -------------- */
+.planejador-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.planejador-titulo {
+    color: #1f4cb9;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.modal-mes-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.btn-mes-nav {
+    border: 1px solid #1f4cb9;
+    background: #fff;
+    color: #1f4cb9;
+    font-size: 1.2rem;
+    font-weight: 700;
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 150ms ease;
+}
+
+.btn-mes-nav:hover {
+    background: #e7f0ff;
+}
+
+.btn-data-opcao {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: #eef4ff;
+    border: 1px solid #c7d8ff;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    font-size: 0.92rem;
+    color: #173f8f;
+    font-weight: 600;
+    transition: background 120ms ease;
+}
+
+.btn-data-opcao:hover {
+    background: #d6e7ff;
+}
+
+.task-check-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    border: 1px solid #d7e2ff;
+    background: #eef4ff;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.task-check-label input[type="checkbox"] {
+    margin-top: 3px;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: #1f4cb9;
+}
+
+.task-check-label:hover {
+    background: #dce9ff;
+}
+
+.btn-confirmar {
+    width: 100%;
+    background: #1f4cb9;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 150ms ease;
+}
+
+.btn-confirmar:hover {
+    background: #1441a5;
+}
+
+
+.modal-loading {
+    color: #888;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 12px 0;
 }
 
 /* -------------- Template: tarefas.html -------------- */
@@ -21,52 +135,11 @@ body {
     box-shadow: 0 10px 30px rgba(31, 76, 185, 0.15);
 }
 
-/* FullCalendar specific fit styling */
-.fc .fc-toolbar-chunk,
-.fc .fc-toolbar-title {
-    background-color: #1f4cb9;
-    color: #fff;
-    border-radius: 8px;
-    padding: 8px 10px;
-}
-
-.fc .fc-toolbar .fc-button {
-    background-color: #15408c;
-    border-color: #0e2f6d;
-}
-
-.fc .fc-toolbar .fc-button:hover {
-    background-color: #10356f;
-}
-
-.fc .fc-col-header-cell {
-    background-color: #d7dae3;
-    color: #222;
-}
-
 .fc .fc-daygrid-day-frame {
-    background-color: #f4f5f8;
-    border: 1px solid #d1d4db;
+    background-color: #f8fbff;
+    border: 1px solid #d6e7ff;
     border-radius: 8px;
 }
-
-.fc .fc-daygrid-day-top {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 6px;
-}
-
-.fc .fc-daygrid-day-number {
-    font-weight: 700;
-    color: #0f2c67;
-}
-
-/* destaque do dia atual */
-.fc .fc-day-today {
-    background-color: #c7d6f6 !important;
-    border: 2px solid #1f4cb9 !important;
-}
-
 
 
 .btn-blue {

@@ -1,125 +1,18 @@
 /* -------------- CSS GLOBAL (index.html) -------------- */
+body {
+    background: white;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* -------------- Template: planejador.html — new components -------------- */
-.planejador-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.planejador-titulo {
-    color: #1f4cb9;
-    font-size: 1.4rem;
-    font-weight: 700;
-}
-
-.modal-mes-nav {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 4px;
-}
-
-.btn-mes-nav {
-    border: 1px solid #1f4cb9;
-    background: #fff;
-    color: #1f4cb9;
-    font-size: 1.2rem;
-    font-weight: 700;
-    width: 34px;
-    height: 34px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 150ms ease;
-}
-
-.btn-mes-nav:hover {
-    background: #e7f0ff;
-}
-
-.btn-data-opcao {
-    display: block;
-    width: 100%;
-    text-align: left;
-    background: #eef4ff;
-    border: 1px solid #c7d8ff;
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    font-size: 0.92rem;
-    color: #173f8f;
-    font-weight: 600;
-    transition: background 120ms ease;
-}
-
-.btn-data-opcao:hover {
-    background: #d6e7ff;
-}
-
-.task-check-label {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    border: 1px solid #d7e2ff;
-    background: #eef4ff;
-    border-radius: 8px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-    cursor: pointer;
-}
-
-.task-check-label input[type="checkbox"] {
-    margin-top: 3px;
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-    accent-color: #1f4cb9;
-}
-
-.task-check-label:hover {
-    background: #dce9ff;
-}
-
-.btn-confirmar {
-    width: 100%;
-    background: #1f4cb9;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 0;
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 150ms ease;
-}
-
-.btn-confirmar:hover {
-    background: #1441a5;
-}
-
-.modal-loading {
-    color: #888;
-    font-size: 0.85rem;
-    text-align: center;
-    padding: 12px 0;
-}
-
 /* -------------- Template: tarefas.html -------------- */
+
 #calendar {
-    max-width: 750px;
+    width: 950px;
     margin: 30px auto 40px;
     padding: 16px;
     background: linear-gradient(135deg, #e6eeff 0%, #d7e7ff 100%);
@@ -128,10 +21,162 @@
     box-shadow: 0 10px 30px rgba(31, 76, 185, 0.15);
 }
 
-.fc .fc-daygrid-day-frame {
-    background-color: #f8fbff;
-    border: 1px solid #d6e7ff;
+/* -------------- estilização de tarefa específica -------------- */
+
+#tarefa {
+    display: flex;
+}
+
+.cronograma-estudos {
+    max-width: 900px;
+    margin: 24px auto;
+    padding: 14px;
+    background: #f6f8ff;
+    border: 1px solid #c8d9ff;
+    border-radius: 12px;
+}
+
+.cronograma-estudos h2 {
+    margin-bottom: 10px;
+    color: #1f4cb9;
+}
+
+.cronograma-table-wrapper {
+    overflow-x: auto;
+}
+
+.cronograma-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    box-shadow: inset 0 0 0 1px #d7e4ff;
+}
+
+.cronograma-table th,
+.cronograma-table td {
+    padding: 10px 12px;
+    border: 1px solid #d5e1ff;
+    text-align: left;
+}
+
+.cronograma-table th {
+    background: #e7efff;
+    color: #1f4cb9;
+    font-weight: 700;
+}
+
+.cronograma-table tbody tr:nth-child(odd) {
+    background: #f8faff;
+}
+
+.cronograma-table tbody tr:hover {
+    background: #dde8ff;
+}
+
+.cronograma-table td#tarefa {
+    cursor: pointer;
+    color: #0f2c67;
+    font-weight: 600;
+}
+
+/* até 3 tarefas na célula */
+.task-cron{
+    min-height: 50px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    gap: 50px;
+}
+
+.atividade-task{
+    width: 500px;
+
+}
+
+
+.tarefa-item {
+    border: 1px solid #1f4cb9;
     border-radius: 8px;
+    background: #eaf0ff;
+    padding: 10px;
+    text-align: center;
+}
+
+/*============================*/
+
+/* FullCalendar specific fit styling */
+.fc .fc-toolbar-chunk,
+.fc .fc-toolbar-title {
+    background-color: #1f4cb9;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+
+.fc .fc-toolbar .fc-button {
+    background-color: #15408c;
+    border-color: #0e2f6d;
+}
+
+.fc .fc-toolbar .fc-button:hover {
+    background-color: #10356f;
+}
+
+.fc .fc-col-header-cell {
+    background-color: #d7dae3;
+    color: #222;
+}
+
+.fc .fc-daygrid-day-frame {
+    background-color: #f4f5f8;
+    border: 1px solid #d1d4db;
+    border-radius: 8px;
+}
+
+.fc .fc-daygrid-day-top {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 6px;
+}
+
+.fc .fc-daygrid-day-number {
+    font-weight: 700;
+    color: #0f2c67;
+}
+
+/* destaque do dia atual */
+.fc .fc-day-today {
+    background-color: #c7d6f6 !important;
+    border: 2px solid #1f4cb9 !important;
+}
+
+
+
+.btn-blue {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: #1f4cb9;
+    color: #ffffff;
+    border: 1px solid #1f4cb9;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 150ms ease, transform 120ms ease;
+}
+
+.btn-blue:hover,
+.btn-blue:focus {
+    background-color: #1441a5;
+    border-color: #0f3790;
+    transform: translateY(-1px);
+}
+
+.btn-blue:active {
+    transform: translateY(0);
 }
 
 .fc .fc-toolbar-title {
@@ -181,66 +226,6 @@
 }
 
 
-/* -------------- Template: planejador.html -------------- */
-.planejador-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: rgba(0, 0, 0, .45);
-}
-
-.planejador-modal.hidden {
-    display: none;
-}
-
-.planejador-modal-content {
-    width: min(90vw, 520px);
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 18px 30px rgba(31, 76, 185, .3);
-}
-
-.modal-close {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: #1f4cb9;
-    color: #fff;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#modal-tarefas {
-    max-height: 220px;
-    overflow-y: auto;
-    margin-bottom: 12px;
-}
-
-.task-card {
-    border: 1px solid #d7e2ff;
-    background: #eef4ff;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 8px;
-}
-
-.modal-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.modal-controls input {
-    width: 72px;
-}
 
 /* -------------- Template: adicionar_tarefa.html -------------- */
 .form-add {
@@ -288,289 +273,68 @@
     cursor: pointer;
 }
 
+/* Estilo do modal dialog */
+dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    border: none;
+    border-radius: 12px;
+    padding: 1rem;
+    background: #ffffff;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+    min-width: 300px;
+    max-width: 90vw;
+}
+
+dialog::backdrop {
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.lista-tarefas {
+    list-style: none;
+    max-height: 260px;
+    overflow-y: auto;
+    margin: 0.8rem 0 0;
+    padding: 0;
+    border: 1px solid #c7d8ff;
+    border-radius: 8px;
+}
+
+.item-tarefa {
+    padding: 0.65rem 0.8rem;
+    border-bottom: 1px solid #eef4ff;
+    cursor: pointer;
+}
+
+.item-tarefa:last-child {
+    border-bottom: none;
+}
+
+.item-tarefa:hover {
+    background: #eef4ff;
+}
+
+.dialog-actions {
+    margin-top: 1rem;
+    text-align: right;
+}
+
+#tarefa-busca {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #95b7ff;
+    border-radius: 8px;
+    margin-top: 0.3rem;
+}
+
+
 .form-add .btn-blue:hover {
     background-color: #1441a5;
 }
 
-/* -------------- Template: planejador.html -------------- */
-.planejador-container {
-    max-width: 1150px;
-    margin: 24px auto;
-    padding: 18px;
-    background: #eef4ff;
-    border: 1px solid #c7d8ff;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(31, 76, 185, 0.15);
-}
-
-.cronograma-wrapper {
-    overflow-x: auto;
-    margin-top: 16px;
-}
-
-.cronograma-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #f8fbff;
-    border: 1px solid #b8ceff;
-}
-
-.cronograma-table th,
-.cronograma-table td {
-    border: 1px solid #d6e7ff;
-    padding: 8px 10px;
-    text-align: center;
-}
-
-.cronograma-table th {
-    background: #1f4cb9;
-    color: #ffffff;
-    font-weight: 700;
-}
-
-.cronograma-table td.hora-label {
-    background: #dce7ff;
-    font-weight: 600;
-    color: #173f8f;
-    position: sticky;
-    left: 0;
-    z-index: 2;
-    white-space: nowrap;
-}
-
-.periodo-header-row td.periodo-header-cell {
-    background: #1f4cb9;
-    color: #ffffff;
-    font-weight: 700;
-    font-size: 0.95rem;
-    padding: 6px 12px;
-    text-align: left;
-    letter-spacing: 0.03em;
-}
-
-.periodo-header-cell small {
-    font-weight: 400;
-    opacity: 0.85;
-    margin-left: 6px;
-}
-
-.cronograma-table td.celula-hora {
-    min-height: 32px;
-    background: #fff;
-    cursor: pointer;
-    transition: background-color 150ms ease, color 150ms ease;
-    padding: 4px;
-}
-
-.cronograma-table td.celula-hora .cell-content {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 6px;
-    min-height: 28px;
-}
-
-.cronograma-table td.celula-hora .cell-tasks {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    flex: 1;
-    min-width: 0;
-}
-
-.cronograma-table td.celula-hora .cell-task-item {
-    background: #d4e4ff;
-    color: #132f79;
-    font-size: 0.72rem;
-    font-weight: 600;
-    padding: 2px 6px;
-    border-radius: 4px;
-    cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: background 120ms ease;
-}
-
-.cronograma-table td.celula-hora .cell-task-item:hover {
-    background: #b0cbff;
-}
-
-.cell-add-btn {
-    border: 0;
-    background: #2f9f4d;
-    color: #fff;
-    height: 24px;
-    width: 24px;
-    min-width: 24px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    flex-shrink: 0;
-}
-
-.cell-add-btn:hover {
-    background: #1f8a3f;
-}
-
-.btn-danger {
-    background: #c0392b;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 18px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.btn-danger:hover {
-    background: #a93226;
-}
-
-.detalhe-label {
-    color: #555;
-    margin: 6px 0 16px;
-}
-
-.cronograma-table tbody tr:nth-child(-n+7) td.celula-hora {
-    background: #eff7ff;
-}
-
-.cronograma-table tbody tr:nth-child(n+8):nth-child(-n+13) td.celula-hora {
-    background: #e4efff;
-}
-
-.cronograma-table tbody tr:nth-child(n+14):nth-child(-n+17) td.celula-hora {
-    background: #d9e7ff;
-}
-
-/* -------------- Template: tarefa_especific.html -------------- */
-.tarefa-container {
-    max-width: 1150px;
-    margin: 24px auto;
-    padding: 18px;
-    background-color: #f6f9ff;
-    border: 1px solid #c7d8ff;
-    border-radius: 12px;
-    box-shadow: 0 10px 22px rgba(31, 76, 185, 0.12);
-}
-
-.tarefa-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 18px;
-}
-
-.btn-add,
-.btn-back {
-    display: inline-block;
-    text-decoration: none;
-    font-weight: 600;
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: 1px solid transparent;
-    transition: all 0.25s ease;
-}
-
-.btn-add {
-    background: linear-gradient(135deg, #0f63d8 0%, #3469e0 100%);
-    color: white;
-}
-
-.btn-add:hover {
-    background: linear-gradient(135deg, #0a52bd 0%, #275ec9 100%);
-    box-shadow: 0 6px 14px rgba(49, 99, 192, 0.3);
-}
-
-.btn-back {
-    background: #ffffff;
-    color: #1f4cb9;
-    border-color: #a8c1ff;
-}
-
-.btn-back:hover {
-    background: #e7f0ff;
-    border-color: #6e99eb;
-}
-
-.btn-start {
-    background: #1e6de6;
-    color: #ffffff;
-    border-color: #185fbf;
-}
-
-.btn-start:hover {
-    background: #1556c3;
-    border-color: #134d9f;
-    box-shadow: 0 4px 10px rgba(11, 71, 150, 0.28);
-}
-
-.btn-delete {
-    background: #fff1f1;
-    color: #d04545;
-    border-color: #e3b5b5;
-    font-size: 0.95rem;
-    padding: 6px 10px;
-    margin-left: 6px;
-}
-
-.btn-delete:hover {
-    background: #fdd7d7;
-}
-
-.table-wrapper {
-    overflow-x: auto;
-}
-
-.tarefas-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 720px;
-    background: white;
-    border: 1px solid #d7e0ff;
-    border-radius: 10px;
-    box-shadow: 0 8px 18px rgba(31, 76, 185, 0.08);
-}
-
-
-.tarefas-table th,
-.tarefas-table td {
-    padding: 12px 14px;
-    border-bottom: 1px solid #e4ecff;
-    text-align: left;
-}
-
-.tarefas-table th {
-    background: linear-gradient(90deg, #2b61d7 0%, #4e86ed 100%);
-    color: #ffffff;
-    letter-spacing: 0.03em;
-    font-weight: 700;
-}
-
-.tarefas-table tr:nth-child(even) {
-    background: #f6f9ff;
-}
-
-.tarefas-table tbody tr:hover {
-    background: #e9f0ff;
-}
-
-.tarefas-table td:last-child {
-    color: #1a2f5f;
-    font-weight: 500;
-}
-
-.descricao-t {
-    max-width: 280px;
-    white-space: normal;
-    word-wrap: break-word;
-    overflow-wrap: anywhere;
-}
 
 /* -------------- Template: horas_tarefa.html -------------- */
 .horas-container {
@@ -755,3 +519,5 @@
 .btn-cont:hover {
     filter: brightness(1.06);
 }
+
+/* Centraliza o modal em tela */

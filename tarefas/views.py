@@ -2,11 +2,12 @@ import json
 import calendar as cal_module
 from decimal import Decimal
 from datetime import datetime, date
+from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import Tarefa, EntradaPlanejador
+from .models import Tarefa, DiaTarefa, EntradaPlanejador
 
 
 def home(request):
@@ -15,21 +16,6 @@ def home(request):
 
 def tarefas(request):
     return render(request, 'tarefas.html')
-
-
-def planejador(request):
-    context = {
-        'dias': range(7),
-        'periodos': [
-            {'nome': 'Manhã',  'label': '5h–12h',
-                'chave': 'manha', 'horas': range(5, 12)},
-            {'nome': 'Tarde',  'label': '12h–18h',
-                'chave': 'tarde', 'horas': range(12, 18)},
-            {'nome': 'Noite',  'label': '18h–22h',
-                'chave': 'noite', 'horas': range(18, 22)},
-        ]
-    }
-    return render(request, 'planejador.html', context)
 
 
 def tarefa_especifica(request, data=None):
@@ -46,14 +32,18 @@ def tarefa_especifica(request, data=None):
                 data_obj = None
 
     tarefas_do_dia = []
-    if data_obj:
-        tarefas_do_dia = Tarefa.objects.filter(
-            data=data_obj).order_by('prioridade', 'nome')
+
+    # carregar todas as tarefas para o modal de busca
+    todas_tarefas = Tarefa.objects.all().order_by('nome')
+    tarefas_dia_tarefa = DiaTarefa.objects.all().order_by('data')
 
     context = {
         'data': data_obj,
         'datas': datas,
-        'tarefas': tarefas_do_dia,
+        'dia_tarefas': tarefas_do_dia,
+        'horarios': range(5, 12),
+        'tarefas': todas_tarefas,
+        'dia_tarefas': tarefas_dia_tarefa
     }
     return render(request, 'tarefa_especific.html', context)
 
@@ -85,129 +75,112 @@ def api_guardar_tempo_gasto(request):
 
     try:
         tarefa = get_object_or_404(Tarefa, id=tarefa_id)
-        valor_adicional = Decimal(str(tempo_minutos))
+        try:
+            valor_adicional = int(round(float(tempo_minutos)))
+        except (TypeError, ValueError):
+            return JsonResponse({'success': False, 'error': 'tempo_minutos inválido'}, status=400)
+
         tarefa.horas_trabalhadas = tarefa.horas_trabalhadas + valor_adicional
         tarefa.save()
-        return JsonResponse({'success': True, 'horas_trabalhadas': float(tarefa.horas_trabalhadas)})
+        return JsonResponse({'success': True, 'horas_trabalhadas': tarefa.horas_trabalhadas})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
-def api_tarefas_por_data(request):
-    data_str = request.GET.get('date')
-    if not data_str:
-        return JsonResponse({'success': False, 'error': 'Parametro date ausente'}, status=400)
-
-    try:
-        data_obj = datetime.strptime(data_str, '%Y-%m-%d').date()
-    except ValueError:
-        return JsonResponse({'success': False, 'error': 'Formato de data inválido'}, status=400)
-
-    tarefas = list(Tarefa.objects.filter(data=data_obj).values(
-        'id', 'nome', 'descricao', 'horas_estimadas', 'horas_trabalhadas'))
-    return JsonResponse({'success': True, 'data': data_str, 'tarefas': tarefas})
-
-
-def api_dias_semana_no_mes(request):
-    dia_str = request.GET.get('dia')
+def api_tarefas_por_mes(request):
     mes_str = request.GET.get('mes')
-
-    if dia_str is None:
-        return JsonResponse({'success': False, 'error': 'Parâmetro dia ausente'}, status=400)
-
-    if mes_str is None:
-        hoje = date.today()
-        mes_str = f"{hoje.year}-{hoje.month:02d}"
+    if not mes_str:
+        return JsonResponse({'success': False, 'error': 'Parâmetro mes ausente'}, status=400)
 
     try:
-        dia_semana = int(dia_str)
         ano, mes = map(int, mes_str.split('-'))
-        date(ano, mes, 1)  # valida ano/mês
+        date(ano, mes, 1)
     except (ValueError, TypeError):
-        return JsonResponse({'success': False, 'error': 'Parâmetros inválidos'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Formato de mes inválido'}, status=400)
 
-    if not (0 <= dia_semana <= 6):
-        return JsonResponse({'success': False, 'error': 'Dia da semana inválido'}, status=400)
-
-    semanas = cal_module.monthcalendar(ano, mes)
-    datas = [
-        date(ano, mes, semana[dia_semana]).strftime('%Y-%m-%d')
-        for semana in semanas
-        if semana[dia_semana] != 0
-    ]
-
-    return JsonResponse({'success': True, 'datas': datas})
-
-
-def api_entradas_planejador(request):
-    entradas = EntradaPlanejador.objects.select_related('tarefa').all()
-    result = []
-    for e in entradas:
-        result.append({
-            'id': e.id,
-            'dia_semana': e.dia_semana,
-            'periodo': e.periodo,
-            'hora': e.hora,
-            'tarefa': {
-                'id': e.tarefa.id,
-                'nome': e.tarefa.nome,
-                'descricao': e.tarefa.descricao,
-                'prioridade': e.tarefa.get_prioridade_display(),
-                'horas_estimadas': float(e.tarefa.horas_estimadas),
-                'horas_trabalhadas': float(e.tarefa.horas_trabalhadas),
-            }
-        })
-    return JsonResponse({'success': True, 'entradas': result})
+    tarefas = list(Tarefa.objects.filter(data__year=ano, data__month=mes).values(
+        'id', 'nome', 'descricao', 'prioridade', 'horas_estimadas', 'horas_trabalhadas', 'data'))
+    return JsonResponse({'success': True, 'mes': mes_str, 'tarefas': tarefas})
 
 
 @require_POST
-def api_adicionar_entrada_planejador(request):
+def api_dia_tarefa(request):
     try:
         payload = json.loads(request.body)
     except ValueError:
         return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
 
     tarefa_id = payload.get('tarefa_id')
-    dia_semana = payload.get('dia_semana')
-    periodo = payload.get('periodo')
-    hora = payload.get('hora')
+    data_str = payload.get('data')
 
-    if tarefa_id is None or dia_semana is None or periodo is None or hora is None:
+    if not tarefa_id or not data_str:
         return JsonResponse({'success': False, 'error': 'Dados incompletos'}, status=400)
 
+    hora_cronograma = payload.get('hora') or ''
+
     try:
-        dia_semana = int(dia_semana)
-        hora = int(hora)
-    except (TypeError, ValueError):
-        return JsonResponse({'success': False, 'error': 'Parâmetros inválidos'}, status=400)
+        tarefa = get_object_or_404(Tarefa, id=tarefa_id)
+        data_obj = datetime.strptime(data_str, '%Y-%m-%d').date()
 
-    if not (0 <= dia_semana <= 6):
-        return JsonResponse({'success': False, 'error': 'Dia da semana inválido'}, status=400)
+        dia_tarefa, created = DiaTarefa.objects.get_or_create(
+            tarefa=tarefa,
+            data=data_obj,
+            hora_cronograma=hora_cronograma
+        )
 
-    if periodo not in ('manha', 'tarde', 'noite'):
-        return JsonResponse({'success': False, 'error': 'Período inválido'}, status=400)
+        dia_tarefa_data = {
+            'id': dia_tarefa.id,
+            'tarefa_id': dia_tarefa.tarefa.id,
+            'data': dia_tarefa.data.isoformat(),
+            'hora_cronograma': dia_tarefa.hora_cronograma,
+        }
 
-    tarefa = get_object_or_404(Tarefa, id=tarefa_id)
-    entrada, created = EntradaPlanejador.objects.get_or_create(
-        tarefa=tarefa, dia_semana=dia_semana, periodo=periodo, hora=hora
-    )
-    return JsonResponse({'success': True, 'created': created, 'entrada_id': entrada.id})
+        return JsonResponse({'success': True, 'created': created,
+                             'dia_tarefa_id': dia_tarefa.id,
+                             'tarefa_id': tarefa.id,
+                             'dia_tarefa': dia_tarefa_data,
+                             'data': data_str})
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'Data inválida'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
 @require_POST
-def api_remover_entrada_planejador(request):
+def api_deletar_dia_tarefa(request):
     try:
         payload = json.loads(request.body)
     except ValueError:
         return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
 
-    entrada_id = payload.get('entrada_id')
-    if entrada_id is None:
-        return JsonResponse({'success': False, 'error': 'Dados incompletos'}, status=400)
+    dia_tarefa_id = payload.get('dia_tarefa_id')
+    nome_tarefa = payload.get('nome_tarefa')
+    data_str = payload.get('data')
+    hora_cronograma = payload.get('hora')
 
-    entrada = get_object_or_404(EntradaPlanejador, id=entrada_id)
-    entrada.delete()
-    return JsonResponse({'success': True})
+    if not (nome_tarefa and data_str and hora_cronograma):
+        return JsonResponse({'success': False, 'error': 'Parâmetros insuficientes para deletar dia_tarefa'}, status=400)
+
+    dia_tarefa = None
+    try:
+        try:
+            data_obj = datetime.strptime(data_str, '%Y-%m-%d').date()
+        except Exception:
+            return JsonResponse({'success': False, 'error': 'Data inválida para filtro'}, status=400)
+
+        dia_tarefa = DiaTarefa.objects.filter(
+            tarefa__nome=nome_tarefa,
+            data=data_obj,
+            hora_cronograma=hora_cronograma
+        ).first()
+
+        if not dia_tarefa:
+          return JsonResponse({'success': False, 'error': 'No DiaTarefa matches the given query.'}, status=404)
+
+        dia_tarefa.delete()
+        return JsonResponse({'success': True})
+    except Exception as e:
+       return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
 def adicionar_tarefa(request, data=None):
@@ -226,13 +199,38 @@ def adicionar_tarefa(request, data=None):
         nome = request.POST.get('nome', '').strip()
         descricao = request.POST.get('descricao', '').strip()
         prioridade = request.POST.get('prioridade', 'ME')
-        horas_estimadas = request.POST.get('horas_estimadas', '0')
+        horas_estimadas_horas = request.POST.get(
+            'horas_estimadas_horas', '').strip()
+        horas_estimadas_minutos = request.POST.get(
+            'horas_estimadas_minutos', '').strip()
         data_form = request.POST.get('data', '')
 
-        try:
-            horas_estimadas = float(horas_estimadas)
-        except ValueError:
-            horas_estimadas = 0
+        minutos_estimados = 0
+        if horas_estimadas_horas != '' or horas_estimadas_minutos != '':
+            try:
+                horas = int(
+                    horas_estimadas_horas) if horas_estimadas_horas != '' else 0
+            except ValueError:
+                horas = 0
+            try:
+                minutos = int(
+                    horas_estimadas_minutos) if horas_estimadas_minutos != '' else 0
+            except ValueError:
+                minutos = 0
+
+            horas = max(0, horas)
+            minutos = max(0, minutos)
+            horas += minutos // 60
+            minutos = minutos % 60
+            minutos_estimados = horas * 60 + minutos
+        else:
+            # compatibilidade com campo antigo (horas como decimal)
+            horas_estimadas = request.POST.get('horas_estimadas', '0')
+            try:
+                horas_estimadas_float = float(horas_estimadas)
+            except ValueError:
+                horas_estimadas_float = 0.0
+            minutos_estimados = max(0, int(round(horas_estimadas_float * 60)))
 
         data_obj = data_valida
         if data_form:
@@ -241,18 +239,15 @@ def adicionar_tarefa(request, data=None):
             except ValueError:
                 data_obj = data_valida
 
-        # Converter horas estimadas para minutos antes de salvar
         nova_tarefa = Tarefa.objects.create(
             nome=nome,
             descricao=descricao,
             prioridade=prioridade,
-            horas_estimadas=horas_estimadas * 60,
+            horas_estimadas=minutos_estimados,
             horas_trabalhadas=0,
             data=data_obj or date.today()
         )
-
-        data_redirect = (data_obj or date.today()).isoformat()
-        return redirect(reverse('tarefa_especifica', args=[data_redirect]))
+        return redirect('tarefas')
 
     context = {
         'data': data_valida.isoformat() if data_valida else '',
