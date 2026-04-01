@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import Tarefa, DiaTarefa, EntradaPlanejador, TarefaFazer, CategoriaTarefa
+from .models import Tarefa, DiaTarefa, EntradaPlanejador, TarefaFazer, CategoriaTarefa, TarefaHistorico
 from django.core.paginator import Paginator
 
 
@@ -61,6 +61,16 @@ def horas_tarefa(request, tarefa_id):
 @require_POST
 def deletar_tarefa(request, tarefa_id):
     tarefa = get_object_or_404(Tarefa, id=tarefa_id)
+    if tarefa.horas_trabalhadas > 0:
+        TarefaHistorico.objects.create(
+            nome=tarefa.nome,
+            descricao=tarefa.descricao,
+            prioridade=tarefa.prioridade,
+            horas_estimadas=tarefa.horas_estimadas,
+            horas_trabalhadas=tarefa.horas_trabalhadas,
+            data_tarefa=tarefa.data,
+            categoria_nome=tarefa.categoria.nome if tarefa.categoria else '',
+        )
     tarefa.delete()
     return JsonResponse({'success': True})
 
@@ -231,6 +241,16 @@ def api_excluir_tarefa_banco(request):
 
     try:
         tarefa = get_object_or_404(Tarefa, id=tarefa_id)
+        if tarefa.horas_trabalhadas > 0:
+            TarefaHistorico.objects.create(
+                nome=tarefa.nome,
+                descricao=tarefa.descricao,
+                prioridade=tarefa.prioridade,
+                horas_estimadas=tarefa.horas_estimadas,
+                horas_trabalhadas=tarefa.horas_trabalhadas,
+                data_tarefa=tarefa.data,
+                categoria_nome=tarefa.categoria.nome if tarefa.categoria else '',
+            )
         tarefa.delete()
         return JsonResponse({'success': True})
     except Exception as e:

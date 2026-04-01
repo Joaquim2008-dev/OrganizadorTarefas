@@ -104,3 +104,30 @@ class TarefaFazer(models.Model):
 
     def __str__(self):
         return f"{self.data} – {self.tarefa.nome}"
+
+
+class TarefaHistorico(models.Model):
+    PRIORIDADE_CHOICES = [
+        ('BA', 'Baixa'),
+        ('ME', 'Média'),
+        ('AL', 'Alta'),
+    ]
+
+    nome = models.CharField(max_length=255)
+    descricao = models.TextField(blank=True)
+    prioridade = models.CharField(max_length=2, choices=PRIORIDADE_CHOICES)
+    horas_estimadas = models.PositiveIntegerField(
+        default=0, help_text='Minutos estimados')
+    horas_trabalhadas = models.PositiveIntegerField(
+        default=0, help_text='Minutos trabalhados')
+    data_tarefa = models.DateField()
+    categoria_nome = models.CharField(max_length=100, blank=True)
+    data_exclusao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-data_exclusao']
+        verbose_name = 'Histórico de Tarefa'
+        verbose_name_plural = 'Histórico de Tarefas'
+
+    def __str__(self):
+        return f"{self.nome} (excluída em {self.data_exclusao:%d/%m/%Y})"
