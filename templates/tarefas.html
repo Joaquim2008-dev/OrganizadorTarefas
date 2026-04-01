@@ -30,12 +30,22 @@
             },
             locale: 'pt-br',
             showNonCurrentDates: false,
-            events: [
-            ],
+            events: function (info, successCallback, failureCallback) {
+                fetch('/api-tarefa-fazer-eventos/')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            successCallback(data.events)
+                        } else {
+                            failureCallback()
+                        }
+                    })
+                    .catch(failureCallback)
+            },
             editable: true,
             selectable: true,
             selectMirror: true,
-            dayMaxEvents: true,
+            dayMaxEvents: false,
             select: function (info) {
                 var date = info.startStr;
                 window.location.href = "{% url 'tarefa_especifica' '0000-00-00' %}".replace('0000-00-00', encodeURIComponent(date));

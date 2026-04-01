@@ -1,22 +1,233 @@
 {% extends 'index.html' %}
+{% load static %}
 
 {% block content %}
 <a href="{% if data %}{% url 'tarefa_especifica' data %}{% else %}{% url 'tarefas' %}{% endif %}" class="btn-back">Voltar</a>
+
+<style>
+  .add-tarefa-layout {
+    display: flex;
+    gap: 24px;
+    max-width: 1200px;
+    margin: 20px auto;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .form-add {
+    flex: 0 0 360px;
+    min-width: 280px;
+  }
+
+  .tarefas-lista-section {
+    flex: 1 1 500px;
+    background: #f6f8ff;
+    border: 1px solid #c8d9ff;
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .tarefas-lista-section h2 {
+    color: #1f4cb9;
+    margin-bottom: 14px;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .tarefas-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(31,76,185,0.08);
+  }
+
+  .tarefas-table th {
+    background: #1f4cb9;
+    color: #fff;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .tarefas-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #e8efff;
+    font-size: 0.88rem;
+    color: #1a2a54;
+    vertical-align: middle;
+  }
+
+  .tarefas-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .tarefas-table tbody tr:hover td {
+    background: #f0f5ff;
+  }
+
+  .badge-prioridade {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .badge-prioridade.BA { background: #2f8f3f; }
+  .badge-prioridade.ME { background: #f2b700; color: #1f2f39; }
+  .badge-prioridade.AL { background: #dc2626; }
+
+  .btn-excluir-tarefa {
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-excluir-tarefa:hover { background: #fca5a5; }
+
+  .paginacao {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .paginacao a, .paginacao span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0 8px;
+  }
+
+  .paginacao a {
+    background: #e8efff;
+    color: #1f4cb9;
+    border: 1px solid #c8d9ff;
+  }
+  .paginacao a:hover { background: #c8d9ff; }
+
+  .paginacao span.pagina-atual {
+    background: #1f4cb9;
+    color: #fff;
+    border: 1px solid #1f4cb9;
+  }
+
+  .btn-editar-tarefa {
+    background: #eff6ff;
+    border: 1px solid #93c5fd;
+    color: #1f4cb9;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-right: 4px;
+  }
+  .btn-editar-tarefa:hover { background: #dbeafe; }
+
+  #modal-editar-tarefa {
+    min-width: 360px;
+    max-width: 520px;
+    width: 90vw;
+    border-radius: 14px;
+    padding: 28px;
+    border: none;
+    box-shadow: 0 12px 32px rgba(31,76,185,0.2);
+  }
+  #modal-editar-tarefa h2 {
+    color: #1f4cb9;
+    margin-bottom: 18px;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .modal-edit-form .form-group {
+    margin-bottom: 12px;
+  }
+  .modal-edit-form label {
+    display: block;
+    font-weight: 600;
+    color: #1f4cb9;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+  }
+  .modal-edit-form input,
+  .modal-edit-form textarea,
+  .modal-edit-form select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #95b7ff;
+    border-radius: 8px;
+    background: #f6f9ff;
+    color: #1a2a54;
+    font-size: 0.9rem;
+  }
+  .modal-edit-form textarea { resize: vertical; }
+  .modal-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 18px;
+  }
+  .btn-modal-salvar {
+    background: #1f4cb9;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-modal-salvar:hover { background: #1441a5; }
+  .btn-modal-fechar {
+    background: #e8efff;
+    color: #1f4cb9;
+    border: 1px solid #c8d9ff;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-modal-fechar:hover { background: #c8d9ff; }
+  .modal-edit-msg {
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-top: 8px;
+    text-align: center;
+  }
+</style>
+
+<div class="add-tarefa-layout">
+
   <section class="form-add">
     <h1>Adicionar Tarefa</h1>
-
     <form method="post" action="">
       {% csrf_token %}
       <div class="form-group">
         <label for="nome">Nome</label>
         <input id="nome" name="nome" type="text" required>
       </div>
-
       <div class="form-group">
-        <label for="descricao">Descrição</label>
-        <textarea id="descricao" name="descricao" rows="4"></textarea>
+        <label for="descricao">Descrição <span style="font-weight:400; color:#8898bb; font-size:0.82rem;">(opcional)</span></label>
+        <textarea id="descricao" name="descricao" rows="3"></textarea>
       </div>
-
       <div class="form-group">
         <label for="prioridade">Prioridade</label>
         <select id="prioridade" name="prioridade" required>
@@ -25,7 +236,15 @@
           <option value="AL">Alta</option>
         </select>
       </div>
-
+      <div class="form-group">
+        <label for="categoria">Categoria</label>
+        <select id="categoria" name="categoria">
+          <option value="">Sem categoria</option>
+          {% for cat in categorias %}
+          <option value="{{ cat.id }}">{{ cat.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
       <div class="form-group">
         <label>Tempo estimado</label>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -39,10 +258,233 @@
           </div>
         </div>
       </div>
-
       <input type="hidden" name="data" value="{{ data }}">
-
       <button type="submit" class="btn-blue">Salvar tarefa</button>
     </form>
   </section>
+
+  <section class="tarefas-lista-section">
+    <h2>Tarefas cadastradas</h2>
+    {% if page_obj.object_list %}
+    <table class="tarefas-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nome</th>
+          <th>Categoria</th>
+          <th>Prioridade</th>
+          <th>Estimado</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="lista-tarefas-body">
+        {% for t in page_obj %}
+        <tr id="row-tarefa-{{ t.id }}">
+          <td>{{ t.id }}</td>
+          <td>{{ t.nome }}</td>
+          <td>{{ t.categoria.nome|default:"—" }}</td>
+          <td><span class="badge-prioridade {{ t.prioridade }}">{{ t.get_prioridade_display }}</span></td>
+          <td>{{ t.horas_estimadas_formatadas }}</td>
+          <td>
+            <button class="btn-editar-tarefa" data-id="{{ t.id }}"
+              data-nome="{{ t.nome|escapejs }}"
+              data-descricao="{{ t.descricao|escapejs }}"
+              data-prioridade="{{ t.prioridade }}"
+              data-categoria="{{ t.categoria.id|default:'' }}"
+              data-horas="{{ t.horas_estimadas|divisibleby:60|yesno:'true,false' }}"
+              data-horas-val="{% widthratio t.horas_estimadas 60 1 %}"
+              data-minutos-val="{{ t.horas_estimadas|add:0 }}"
+            >Editar</button>
+            <button class="btn-excluir-tarefa" data-id="{{ t.id }}">Excluir</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <nav class="paginacao">
+      {% if page_obj.has_previous %}
+        <a href="?page=1">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}">&#8249;</a>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <span class="pagina-atual">{{ num }}</span>
+        {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+          <a href="?page={{ num }}">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">&#8250;</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">&raquo;</a>
+      {% endif %}
+    </nav>
+    {% else %}
+    <p class="sem-tarefas">Nenhuma tarefa cadastrada ainda.</p>
+    {% endif %}
+  </section>
+
+</div>
+
+<!-- Modal de edição de tarefa -->
+<dialog id="modal-editar-tarefa">
+  <h2>Editar Tarefa</h2>
+  <form class="modal-edit-form" id="form-editar-tarefa">
+    <input type="hidden" id="edit-tarefa-id">
+    <div class="form-group">
+      <label for="edit-nome">Nome</label>
+      <input id="edit-nome" type="text" required>
+    </div>
+    <div class="form-group">
+      <label for="edit-descricao">Descrição <span style="font-weight:400;color:#8898bb;font-size:0.82rem;">(opcional)</span></label>
+      <textarea id="edit-descricao" rows="3"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="edit-prioridade">Prioridade</label>
+      <select id="edit-prioridade">
+        <option value="BA">Baixa</option>
+        <option value="ME">Média</option>
+        <option value="AL">Alta</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="edit-categoria">Categoria</label>
+      <select id="edit-categoria">
+        <option value="">Sem categoria</option>
+        {% for cat in categorias %}
+        <option value="{{ cat.id }}">{{ cat.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Tempo estimado</label>
+      <div style="display:flex;gap:8px;">
+        <div style="flex:1">
+          <label for="edit-horas">Horas</label>
+          <input id="edit-horas" type="number" min="0" value="0">
+        </div>
+        <div style="flex:1">
+          <label for="edit-minutos">Minutos</label>
+          <input id="edit-minutos" type="number" min="0" max="59" value="0">
+        </div>
+      </div>
+    </div>
+    <p class="modal-edit-msg" id="edit-msg" hidden></p>
+    <div class="modal-edit-actions">
+      <button type="button" class="btn-modal-fechar" id="btn-fechar-modal-edit">Cancelar</button>
+      <button type="submit" class="btn-modal-salvar">Salvar</button>
+    </div>
+  </form>
+</dialog>
+<script>
+  function getCookie(name) {
+    const value = `; ${document.cookie}`
+    const parts = value.split(`; ${name}=`)
+    if (parts.length === 2) return parts.pop().split(';').shift()
+    return ''
+  }
+
+  // ---- Excluir ----
+  document.getElementById('lista-tarefas-body')?.addEventListener('click', function (e) {
+    const btn = e.target.closest('.btn-excluir-tarefa')
+    if (!btn) return
+    const tarefaId = btn.dataset.id
+    if (!confirm('Excluir esta tarefa permanentemente?')) return
+
+    fetch('/api-excluir-tarefa-banco/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+      body: JSON.stringify({ tarefa_id: tarefaId }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById(`row-tarefa-${tarefaId}`)?.remove()
+        } else {
+          alert('Erro ao excluir: ' + (data.error || 'desconhecido'))
+        }
+      })
+      .catch(() => alert('Erro de conexão.'))
+  })
+
+  // ---- Editar ----
+  const modalEditar = document.getElementById('modal-editar-tarefa')
+  const formEditar = document.getElementById('form-editar-tarefa')
+  const editMsg = document.getElementById('edit-msg')
+
+  document.getElementById('lista-tarefas-body')?.addEventListener('click', function (e) {
+    const btn = e.target.closest('.btn-editar-tarefa')
+    if (!btn) return
+
+    const totalMinutos = parseInt(btn.dataset.minutosVal || '0')
+    const horas = Math.floor(totalMinutos / 60)
+    const mins = totalMinutos % 60
+
+    document.getElementById('edit-tarefa-id').value = btn.dataset.id
+    document.getElementById('edit-nome').value = btn.dataset.nome
+    document.getElementById('edit-descricao').value = btn.dataset.descricao
+    document.getElementById('edit-prioridade').value = btn.dataset.prioridade
+    document.getElementById('edit-categoria').value = btn.dataset.categoria || ''
+    document.getElementById('edit-horas').value = horas
+    document.getElementById('edit-minutos').value = mins
+    editMsg.hidden = true
+
+    modalEditar.showModal()
+  })
+
+  document.getElementById('btn-fechar-modal-edit').addEventListener('click', () => modalEditar.close())
+
+  formEditar.addEventListener('submit', function (e) {
+    e.preventDefault()
+    const tarefaId = document.getElementById('edit-tarefa-id').value
+    const payload = {
+      tarefa_id: tarefaId,
+      nome: document.getElementById('edit-nome').value.trim(),
+      descricao: document.getElementById('edit-descricao').value.trim(),
+      prioridade: document.getElementById('edit-prioridade').value,
+      categoria_id: document.getElementById('edit-categoria').value || null,
+      horas: parseInt(document.getElementById('edit-horas').value || '0'),
+      minutos: parseInt(document.getElementById('edit-minutos').value || '0'),
+    }
+
+    fetch('/api-editar-tarefa/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+      body: JSON.stringify(payload),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const row = document.getElementById(`row-tarefa-${tarefaId}`)
+          if (row) {
+            row.cells[1].textContent = data.nome
+            row.cells[2].textContent = data.categoria_nome || '—'
+            const badge = row.cells[3].querySelector('.badge-prioridade')
+            badge.className = `badge-prioridade ${data.prioridade}`
+            badge.textContent = data.prioridade_display
+            row.cells[4].textContent = data.horas_estimadas_formatadas
+            // atualizar data-* do botão editar para próxima abertura
+            const editBtn = row.querySelector('.btn-editar-tarefa')
+            editBtn.dataset.nome = data.nome
+            editBtn.dataset.descricao = data.descricao
+            editBtn.dataset.prioridade = data.prioridade
+          }
+          editMsg.textContent = 'Salvo com sucesso!'
+          editMsg.style.color = 'green'
+          editMsg.hidden = false
+          setTimeout(() => modalEditar.close(), 1200)
+        } else {
+          editMsg.textContent = 'Erro: ' + (data.error || 'desconhecido')
+          editMsg.style.color = 'red'
+          editMsg.hidden = false
+        }
+      })
+      .catch(() => {
+        editMsg.textContent = 'Erro de conexão.'
+        editMsg.style.color = 'red'
+        editMsg.hidden = false
+      })
+  })
+</script>
+
 {% endblock %}

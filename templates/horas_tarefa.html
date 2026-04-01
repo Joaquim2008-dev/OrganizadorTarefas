@@ -1,4 +1,5 @@
 {% extends 'index.html' %}
+{% load static %}
 
 {% block content %}
 <h1>Horas da Tarefa</h1>
@@ -37,13 +38,29 @@
         <button type="button" class="btn-cont btn-iniciar">Iniciar</button>
         <button type="button" class="btn-cont btn-pausar">Pausar</button>
         <button type="button" class="btn-cont btn-resetar">Resetar</button>
-        <button type="button" class="btn-cont btn-finalizar">Finalizar</button>
       </div>
+
+      <form id="form-registrar-tempo" class="form-registrar-tempo">
+        <h3>Registrar tempo trabalhado</h3>
+        <div class="form-registrar-campos">
+          <div class="form-campo">
+            <label for="input-horas">Horas</label>
+            <input type="number" id="input-horas" min="0" max="99" value="0" />
+          </div>
+          <div class="form-campo">
+            <label for="input-minutos">Minutos</label>
+            <input type="number" id="input-minutos" min="0" max="59" value="0" />
+          </div>
+          <button type="submit" class="btn-cont btn-registrar">Registrar</button>
+        </div>
+        <p id="msg-registrar-tempo" class="msg-registrar-tempo" hidden></p>
+      </form>
     </section>
   </main>
 
   <div class='actions-row'>
-    <a href="{% url 'tarefa_especifica' tarefa.data %}" class="btn-back">Voltar</a>
+    <a href="{% url 'tarefas' %}" class="btn-back">Home</a>
+    <a href="{% url 'tarefa_especifica' data_cronograma %}" class="btn-back">Voltar</a>
   </div>
 </section>
 
@@ -54,6 +71,24 @@
   const btnResetar = document.querySelector('.btn-resetar')
   const tempoMinutosInput = document.getElementById('tempo-minutos')
   const timeDisplay = document.getElementById('time')
+
+  /* ====== Áudio de alarme ====== */
+  const audioAlarme = new Audio("{% static 'musicas/musica_fim_alarme.mp3' %}")
+  let alarmeTimeoutId = null
+
+  function pararAlarme() {
+    audioAlarme.pause()
+    audioAlarme.currentTime = 0
+    if (alarmeTimeoutId !== null) {
+      clearTimeout(alarmeTimeoutId)
+      alarmeTimeoutId = null
+    }
+  }
+
+  function tocarAlarme() {
+    audioAlarme.play()
+    alarmeTimeoutId = setTimeout(pararAlarme, 10000)
+  }
 
   /* ====== Estado do cronômetro ====== */
   let intervaloId = null
@@ -93,6 +128,7 @@
       if (segundosRestantes <= 0) {
         clearInterval(intervaloId)
         intervaloId = null
+        tocarAlarme()
         return
       }
 
@@ -110,11 +146,11 @@
 
   function resetarCronometro() {
     pausarCronometro()
+    pararAlarme()
     atualizarTempoTotal()
   }
 
-  /* ====== Finalizar tarefa ====== */
-  const btnFinalizar = document.querySelector('.btn-finalizar')
+  /* ====== Registrar tempo manualmente ====== */
   const tarefaId = {{ tarefa.id }}
 
   function getCookie(name) {
@@ -124,46 +160,48 @@
     return ''
   }
 
-  function enviarTempoTrabalhado(tempoSegundos) {
-    const tempoMinutos = Number((tempoSegundos / 60).toFixed(2))
+  const formRegistrar = document.getElementById('form-registrar-tempo')
+  const msgRegistrar = document.getElementById('msg-registrar-tempo')
 
-    return fetch('{% url "api-guadar-tempo-gasto" %}', {
+  formRegistrar.addEventListener('submit', (event) => {
+    event.preventDefault()
+
+    const horas = Math.max(0, parseInt(document.getElementById('input-horas').value, 10) || 0)
+    const minutos = Math.max(0, parseInt(document.getElementById('input-minutos').value, 10) || 0)
+    const totalMinutos = horas * 60 + minutos
+
+    if (totalMinutos === 0) {
+      mostrarMsg('Informe ao menos 1 minuto.', false)
+      return
+    }
+
+    fetch('{% url "api-registrar-tempo-trabalhado" %}', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRFToken': getCookie('csrftoken'),
       },
-      body: JSON.stringify({
-        tarefa_id: tarefaId,
-        tempo_minutos: tempoMinutos,
-      }),
-    }).then(response => response.json())
-  }
-
-  btnFinalizar.addEventListener('click', () => {
-    const confirmar = window.confirm('Deseja realmente concluir a tarefa?')
-    if (!confirmar) return
-
-    const tempoGastoSegundos = segundosTotais - segundosRestantes
-    if (tempoGastoSegundos < 0) {
-      alert('Erro no cálculo do tempo gasto. Por favor, reinicie o cronômetro.')
-      return
-    }
-
-    enviarTempoTrabalhado(tempoGastoSegundos)
+      body: JSON.stringify({ tarefa_id: tarefaId, minutos: totalMinutos }),
+    })
+      .then(res => res.json())
       .then(data => {
         if (data.success) {
-          alert('Tempo registrado com sucesso.')
-          pausarCronometro()
-          resetarCronometro()
+          mostrarMsg('Tempo registrado com sucesso!', true)
+          document.getElementById('input-horas').value = 0
+          document.getElementById('input-minutos').value = 0
         } else {
-          alert('Falha ao registrar tempo: ' + (data.error || 'erro desconhecido'))
+          mostrarMsg('Falha: ' + (data.error || 'erro desconhecido'), false)
         }
       })
-      .catch(() => {
-        alert('Erro de conexão ao enviar o tempo.')
-      })
+      .catch(() => mostrarMsg('Erro de conexão.', false))
   })
+
+  function mostrarMsg(texto, sucesso) {
+    msgRegistrar.textContent = texto
+    msgRegistrar.style.color = sucesso ? 'green' : 'red'
+    msgRegistrar.hidden = false
+    setTimeout(() => { msgRegistrar.hidden = true }, 4000)
+  }
 
   /* ====== Eventos ====== */
   btnIniciar.addEventListener('click', iniciarCronometro)

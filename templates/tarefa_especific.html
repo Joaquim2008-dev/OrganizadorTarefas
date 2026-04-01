@@ -1,4 +1,5 @@
 {% extends 'index.html' %}
+{% load static %}
 
 {% block content %}
 <script>
@@ -87,12 +88,147 @@
     margin-top: 1rem;
     text-align: right;
   }
+
+  .section-header {
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    font-size: 0.92rem;
+  }
+  .section-header.manha,
+  .section-header.manha td {
+    background: #2563eb !important;
+  }
+  .section-header.tarde,
+  .section-header.tarde td {
+    background: #ea580c !important;
+  }
+  .section-header.noite,
+  .section-header.noite td {
+    background: #7c3aed !important;
+  }
+  .period-row.manha td { background: #eff6ff; }
+  .period-row.tarde td { background: #fff7ed; }
+  .period-row.noite td { background: #f3e8ff; }
+
+  /* seção tarefas a fazer */
+  .tarefas-a-fazer {
+    margin-bottom: 20px;
+    padding: 14px;
+    border: 1px solid #aecbff;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #eaf2ff 0%, #d7e8ff 100%);
+  }
+  .tarefas-a-fazer h2 {
+    color: #1f4cb9;
+    margin-bottom: 8px;
+  }
+  .tarefas-a-fazer-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .tarefas-a-fazer-controls select,
+  .tarefas-a-fazer-controls button {
+    border-radius: 8px;
+    border: 1px solid #90bbf7;
+    padding: 8px 10px;
+    font-weight: 600;
+  }
+  .tarefas-a-fazer-controls select {
+    width: 100%;
+    max-width: 400px;
+  }
+  #select-categoria-fazer {
+    max-width: 220px;
+    background: #eef4ff;
+  }
+  .tarefas-a-fazer-controls button {
+    background: #1f4cb9;
+    color: #fff;
+    cursor: pointer;
+  }
+  .tarefas-a-fazer-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .tarefas-a-fazer-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px;
+    min-width: 200px;
+    max-width: calc(20% - 10px);
+    border: 1px solid #7ea6e9;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(31, 76, 185, 0.12);
+  }
+  .tarefas-a-fazer-card .btn-close-card {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 50%;
+    background: #f87171;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tarefas-a-fazer-card .btn-close-card:hover {
+    background: #dc2626;
+  }
+  .tarefas-a-fazer-card h3 {
+    margin: 0;
+    color: #1f4cb9;
+  }
+  .tarefas-a-fazer-card small {
+    color: #586a8a;
+  }
+  .tarefas-a-fazer-card span {
+    font-weight: 700;
+  }
 </style>
 <h1>Tarefa Específica {{data}}</h1>
 
+<div class="actions-row">
+  <a href="{% url 'tarefas' %}" class="btn-back">Home</a>
+  <a href="{% url 'adicionar_tarefa' %}" class="btn-back">Nova Tarefa</a>
+</div>
+
+<section class="tarefas-a-fazer">
+  <h2>Tarefas a fazer</h2>
+  <div class="tarefas-a-fazer-controls">
+    <select id="select-categoria-fazer">
+      <option value="">Todas as categorias</option>
+      {% for cat in categorias %}
+      <option value="{{ cat.id }}">{{ cat.nome }}</option>
+      {% endfor %}
+    </select>
+    <select id="select-tarefa-fazer">
+      <option value="">Selecione uma tarefa</option>
+      {% for tarefa in tarefas %}
+      <option value="{{ tarefa.id }}" data-desc="{{ tarefa.descricao|escapejs }}" data-horas="{{ tarefa.horas_estimadas }}" data-categoria="{{ tarefa.categoria_id|default:'' }}">{{ tarefa.nome }}</option>
+      {% endfor %}
+    </select>
+    <button id="btn-adicionar-tarefa-fazer" type="button">Adicionar</button>
+  </div>
+  <div id="tarefas-a-fazer-list" class="tarefas-a-fazer-list"></div>
+</section>
+
 <section class="cronograma-estudos">
   <h2>Cronograma de Estudos</h2>
-  <p>Manhã: 5h–12h</p>
+  <p>Manhã: 5h–12h&nbsp;|&nbsp;Tarde: 12h–18h&nbsp;|&nbsp;Noite: 18h–23h</p>
   <div class="cronograma-table-wrapper">
     <table class="cronograma-table">
       <thead>
@@ -102,16 +238,51 @@
         </tr>
       </thead>
       <tbody>
+        <tr class="section-header manha"><td colspan="2">MANHÃ</td></tr>
         {% for hora in horarios %}
-        <tr>
-          <td>{{ hora }}h - {{ hora|add:1 }}h</td>
-          <td class="task-cron" id='tarefa'></td>
-        </tr>
+          {% if hora == 12 %}
+            <tr class="section-header tarde"><td colspan="2">TARDE</td></tr>
+          {% elif hora == 18 %}
+            <tr class="section-header noite"><td colspan="2">NOITE</td></tr>
+          {% endif %}
+          <tr class="period-row {% if hora < 12 %}manha{% elif hora < 18 %}tarde{% else %}noite{% endif %}">
+            <td>{{ hora }}h - {{ hora|add:1 }}h</td>
+            <td class="task-cron" id='tarefa'></td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </section>
+<script src="{% static 'js/js_tarefas_a_fazer/main.js' %}"></script>
+<script>
+  (function () {
+    const selectCategoria = document.getElementById('select-categoria-fazer');
+    const selectTarefa = document.getElementById('select-tarefa-fazer');
+    const allOptions = Array.from(selectTarefa.options);
+
+    selectCategoria.addEventListener('change', function () {
+      const catId = this.value;
+      const prevValue = selectTarefa.value;
+
+      // Remove todas as opções exceto o placeholder
+      while (selectTarefa.options.length > 1) {
+        selectTarefa.remove(1);
+      }
+
+      allOptions.forEach(function (opt) {
+        if (!opt.value) return; // placeholder
+        if (!catId || opt.dataset.categoria === catId) {
+          selectTarefa.appendChild(opt.cloneNode(true));
+        }
+      });
+
+      // Tenta restaurar a seleção anterior se ainda disponível
+      selectTarefa.value = prevValue || '';
+    });
+  })();
+</script>
+<!--Cadastro de tarefas-->
 <dialog id="tarefa-modal">
   <h1>Selecionar tarefa</h1>
   <label for="tarefa-busca">Buscar tarefa</label>
@@ -129,4 +300,15 @@
   </div>
 </dialog>
 
+<!-- Modal para ações em tarefa já cadastrada -->
+<dialog id="tarefa-menu-modal">
+  <h2 id="tarefa-menu-titulo">Tarefa</h2>
+  <div class="dialog-actions">
+    <button type="button" id="tarefa-menu-start">Start</button>
+    <button type="button" id="tarefa-menu-excluir">Excluir</button>
+    <button type="button" id="tarefa-menu-fechar">Fechar</button>
+  </div>
+</dialog>
+
+<!--Inicializar tarefas-->
 {% endblock %}

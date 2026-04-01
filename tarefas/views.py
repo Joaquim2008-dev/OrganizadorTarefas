@@ -7,7 +7,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import Tarefa, DiaTarefa, EntradaPlanejador
+from .models import Tarefa, DiaTarefa, EntradaPlanejador, TarefaFazer, CategoriaTarefa
+from django.core.paginator import Paginator
 
 
 def home(request):
@@ -34,23 +35,27 @@ def tarefa_especifica(request, data=None):
     tarefas_do_dia = []
 
     # carregar todas as tarefas para o modal de busca
-    todas_tarefas = Tarefa.objects.all().order_by('nome')
+    todas_tarefas = Tarefa.objects.select_related(
+        'categoria').all().order_by('nome')
     tarefas_dia_tarefa = DiaTarefa.objects.all().order_by('data')
+    categorias = CategoriaTarefa.objects.all()
 
     context = {
         'data': data_obj,
         'datas': datas,
         'dia_tarefas': tarefas_do_dia,
-        'horarios': range(5, 12),
+        'horarios': range(5, 23),
         'tarefas': todas_tarefas,
-        'dia_tarefas': tarefas_dia_tarefa
+        'dia_tarefas': tarefas_dia_tarefa,
+        'categorias': categorias,
     }
     return render(request, 'tarefa_especific.html', context)
 
 
 def horas_tarefa(request, tarefa_id):
     tarefa = get_object_or_404(Tarefa, id=tarefa_id)
-    return render(request, 'horas_tarefa.html', {'tarefa': tarefa})
+    data_cronograma = request.GET.get('data', '') or str(tarefa.data)
+    return render(request, 'horas_tarefa.html', {'tarefa': tarefa, 'data_cronograma': data_cronograma})
 
 
 @require_POST
@@ -175,12 +180,183 @@ def api_deletar_dia_tarefa(request):
         ).first()
 
         if not dia_tarefa:
-          return JsonResponse({'success': False, 'error': 'No DiaTarefa matches the given query.'}, status=404)
+            return JsonResponse({'success': False, 'error': 'No DiaTarefa matches the given query.'}, status=404)
 
         dia_tarefa.delete()
         return JsonResponse({'success': True})
     except Exception as e:
-       return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@require_POST
+def api_registrar_tempo_trabalhado(request):
+    try:
+        payload = json.loads(request.body)
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
+
+    tarefa_id = payload.get('tarefa_id')
+    minutos = payload.get('minutos')
+
+    if tarefa_id is None or minutos is None:
+        return JsonResponse({'success': False, 'error': 'Dados incompletos'}, status=400)
+
+    try:
+        minutos_int = int(minutos)
+        if minutos_int <= 0:
+            return JsonResponse({'success': False, 'error': 'Minutos devem ser maiores que zero'}, status=400)
+    except (TypeError, ValueError):
+        return JsonResponse({'success': False, 'error': 'minutos inválido'}, status=400)
+
+    try:
+        tarefa = get_object_or_404(Tarefa, id=tarefa_id)
+        tarefa.horas_trabalhadas += minutos_int
+        tarefa.save()
+        return JsonResponse({'success': True, 'horas_trabalhadas': tarefa.horas_trabalhadas})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@require_POST
+def api_excluir_tarefa_banco(request):
+    try:
+        payload = json.loads(request.body)
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
+
+    tarefa_id = payload.get('tarefa_id')
+
+    if not tarefa_id:
+        return JsonResponse({'success': False, 'error': 'tarefa_id não informado'}, status=400)
+
+    try:
+        tarefa = get_object_or_404(Tarefa, id=tarefa_id)
+        tarefa.delete()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@require_POST
+def api_tarefa_fazer(request):
+    try:
+        payload = json.loads(request.body)
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
+
+    tarefa_id = payload.get('tarefa_id')
+    data_str = payload.get('data')
+
+    if not tarefa_id or not data_str:
+        return JsonResponse({'success': False, 'error': 'Dados incompletos'}, status=400)
+
+    try:
+        tarefa = get_object_or_404(Tarefa, id=tarefa_id)
+        data_obj = datetime.strptime(data_str, '%Y-%m-%d').date()
+        obj, created = TarefaFazer.objects.get_or_create(
+            tarefa=tarefa, data=data_obj)
+        return JsonResponse({
+            'success': True,
+            'created': created,
+            'id': obj.id,
+            'tarefa_id': tarefa.id,
+            'tarefa_nome': tarefa.nome,
+            'descricao': tarefa.descricao,
+            'horas_estimadas': tarefa.horas_estimadas,
+        })
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'Data inválida'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def api_tarefa_fazer_list(request):
+    data_str = request.GET.get('data')
+    if not data_str:
+        return JsonResponse({'success': False, 'error': 'Parâmetro data ausente'}, status=400)
+    try:
+        data_obj = datetime.strptime(data_str, '%Y-%m-%d').date()
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'Data inválida'}, status=400)
+
+    items = TarefaFazer.objects.filter(data=data_obj).select_related('tarefa')
+    result = [{
+        'id': item.id,
+        'tarefa_id': item.tarefa.id,
+        'tarefa_nome': item.tarefa.nome,
+        'descricao': item.tarefa.descricao,
+        'horas_estimadas': item.tarefa.horas_estimadas,
+    } for item in items]
+    return JsonResponse({'success': True, 'items': result})
+
+
+@require_POST
+def api_tarefa_fazer_delete(request):
+    try:
+        payload = json.loads(request.body)
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
+
+    item_id = payload.get('id')
+    if not item_id:
+        return JsonResponse({'success': False, 'error': 'id não informado'}, status=400)
+
+    try:
+        obj = get_object_or_404(TarefaFazer, id=item_id)
+        obj.delete()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@require_POST
+def api_editar_tarefa(request):
+    try:
+        payload = json.loads(request.body)
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
+
+    tarefa_id = payload.get('tarefa_id')
+    if not tarefa_id:
+        return JsonResponse({'success': False, 'error': 'tarefa_id não informado'}, status=400)
+
+    try:
+        tarefa = get_object_or_404(Tarefa, id=tarefa_id)
+        tarefa.nome = payload.get('nome', tarefa.nome).strip()
+        tarefa.descricao = payload.get('descricao', tarefa.descricao).strip()
+        tarefa.prioridade = payload.get('prioridade', tarefa.prioridade)
+        categoria_id = payload.get('categoria_id')
+        tarefa.categoria_id = int(categoria_id) if categoria_id else None
+        horas = int(payload.get('horas', 0) or 0)
+        minutos = int(payload.get('minutos', 0) or 0)
+        horas += minutos // 60
+        minutos = minutos % 60
+        tarefa.horas_estimadas = horas * 60 + minutos
+        tarefa.save()
+        return JsonResponse({
+            'success': True,
+            'nome': tarefa.nome,
+            'descricao': tarefa.descricao,
+            'prioridade': tarefa.prioridade,
+            'prioridade_display': tarefa.get_prioridade_display(),
+            'categoria_nome': tarefa.categoria.nome if tarefa.categoria else '',
+            'horas_estimadas_formatadas': tarefa.horas_estimadas_formatadas,
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def api_tarefa_fazer_eventos(request):
+    items = TarefaFazer.objects.select_related('tarefa').all()
+    result = [
+        {
+            'title': item.tarefa.nome,
+            'start': item.data.isoformat(),
+            'allDay': True,
+        }
+        for item in items
+    ]
+    return JsonResponse({'success': True, 'events': result})
 
 
 def adicionar_tarefa(request, data=None):
@@ -245,11 +421,20 @@ def adicionar_tarefa(request, data=None):
             prioridade=prioridade,
             horas_estimadas=minutos_estimados,
             horas_trabalhadas=0,
-            data=data_obj or date.today()
+            data=data_obj or date.today(),
+            categoria_id=request.POST.get('categoria') or None
         )
-        return redirect('tarefas')
+        return redirect('adicionar_tarefa')
+
+    todas_tarefas = Tarefa.objects.select_related('categoria').order_by('-id')
+    paginator = Paginator(todas_tarefas, 10)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    categorias = CategoriaTarefa.objects.all()
 
     context = {
         'data': data_valida.isoformat() if data_valida else '',
+        'page_obj': page_obj,
+        'categorias': categorias,
     }
     return render(request, 'adicionar_tarefa.html', context)

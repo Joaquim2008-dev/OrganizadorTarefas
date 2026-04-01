@@ -12,13 +12,38 @@ body {
 /* -------------- Template: tarefas.html -------------- */
 
 #calendar {
-    width: 950px;
-    margin: 30px auto 40px;
-    padding: 16px;
+    width: calc(100vw - 40px);
+    height: calc(100vh - 60px);
+    margin: 20px auto;
+    padding: 20px;
     background: linear-gradient(135deg, #e6eeff 0%, #d7e7ff 100%);
     border: 1px solid #a8c7ff;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(31, 76, 185, 0.15);
+    box-sizing: border-box;
+}
+
+.fc-event {
+    background: #1f4cb9 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 2px 6px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px !important;
+}
+
+.fc-event:hover {
+    background: #1441a5 !important;
+    cursor: default;
+}
+
+.fc-daygrid-event-dot {
+    display: none !important;
 }
 
 /* -------------- estilização de tarefa específica -------------- */
@@ -80,7 +105,7 @@ body {
 }
 
 /* até 3 tarefas na célula */
-.task-cron{
+.task-cron {
     min-height: 50px;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -88,7 +113,7 @@ body {
     gap: 50px;
 }
 
-.atividade-task{
+.atividade-task {
     width: 500px;
 
 }
@@ -180,7 +205,7 @@ body {
 }
 
 .fc .fc-toolbar-title {
-    color: #1f4cb9;
+    color: #ffffff;
     font-weight: 700;
 }
 
@@ -518,6 +543,93 @@ dialog::backdrop {
 
 .btn-cont:hover {
     filter: brightness(1.06);
+}
+
+.form-registrar-tempo {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border: 1px solid #c7d8ff;
+    border-radius: 14px;
+    padding: 24px 28px;
+    box-shadow: 0 4px 16px rgba(31, 76, 185, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-registrar-tempo h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f4cb9;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: center;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #d9e6ff;
+}
+
+.form-registrar-campos {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.form-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 80px;
+    min-width: 80px;
+    max-width: 120px;
+}
+
+.form-campo label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #5f6f88;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.form-campo input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #95b7ff;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a2a54;
+    text-align: center;
+    background: #f6f9ff;
+    transition: border-color 0.2s;
+}
+
+.form-campo input[type="number"]:focus {
+    outline: none;
+    border-color: #1f4cb9;
+    background: #ffffff;
+}
+
+.btn-registrar {
+    background: #1f4cb9;
+    align-self: flex-end;
+    min-width: 110px;
+    padding: 10px 18px;
+    flex-shrink: 0;
+}
+
+.msg-registrar-tempo {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #f0f5ff;
 }
 
 /* Centraliza o modal em tela */

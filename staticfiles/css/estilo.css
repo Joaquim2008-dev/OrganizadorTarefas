@@ -1,6 +1,6 @@
 /* -------------- CSS GLOBAL (index.html) -------------- */
 body {
-    background: #000;
+    background: white;
 }
 
 * {
@@ -12,7 +12,7 @@ body {
 /* -------------- Template: tarefas.html -------------- */
 
 #calendar {
-    max-width: 750px;
+    width: 950px;
     margin: 30px auto 40px;
     padding: 16px;
     background: linear-gradient(135deg, #e6eeff 0%, #d7e7ff 100%);
@@ -20,6 +20,89 @@ body {
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(31, 76, 185, 0.15);
 }
+
+/* -------------- estilização de tarefa específica -------------- */
+
+#tarefa {
+    display: flex;
+}
+
+.cronograma-estudos {
+    max-width: 900px;
+    margin: 24px auto;
+    padding: 14px;
+    background: #f6f8ff;
+    border: 1px solid #c8d9ff;
+    border-radius: 12px;
+}
+
+.cronograma-estudos h2 {
+    margin-bottom: 10px;
+    color: #1f4cb9;
+}
+
+.cronograma-table-wrapper {
+    overflow-x: auto;
+}
+
+.cronograma-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    box-shadow: inset 0 0 0 1px #d7e4ff;
+}
+
+.cronograma-table th,
+.cronograma-table td {
+    padding: 10px 12px;
+    border: 1px solid #d5e1ff;
+    text-align: left;
+}
+
+.cronograma-table th {
+    background: #e7efff;
+    color: #1f4cb9;
+    font-weight: 700;
+}
+
+.cronograma-table tbody tr:nth-child(odd) {
+    background: #f8faff;
+}
+
+.cronograma-table tbody tr:hover {
+    background: #dde8ff;
+}
+
+.cronograma-table td#tarefa {
+    cursor: pointer;
+    color: #0f2c67;
+    font-weight: 600;
+}
+
+/* até 3 tarefas na célula */
+.task-cron{
+    min-height: 50px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    gap: 50px;
+}
+
+.atividade-task{
+    width: 500px;
+
+}
+
+
+.tarefa-item {
+    border: 1px solid #1f4cb9;
+    border-radius: 8px;
+    background: #eaf0ff;
+    padding: 10px;
+    text-align: center;
+}
+
+/*============================*/
 
 /* FullCalendar specific fit styling */
 .fc .fc-toolbar-chunk,

@@ -1,6 +1,18 @@
 from django.db import models
 
 
+class CategoriaTarefa(models.Model):
+    nome = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        ordering = ['nome']
+        verbose_name = 'Categoria'
+        verbose_name_plural = 'Categorias'
+
+    def __str__(self):
+        return self.nome
+
+
 class Tarefa(models.Model):
     PRIORIDADE_CHOICES = [
         ('BA', 'Baixa'),
@@ -17,6 +29,9 @@ class Tarefa(models.Model):
     horas_trabalhadas = models.PositiveIntegerField(
         default=0, help_text='Minutos trabalhados')
     data = models.DateField()
+    categoria = models.ForeignKey(
+        CategoriaTarefa, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='tarefas')
 
     @property
     def horas_estimadas_formatadas(self):
@@ -76,3 +91,16 @@ class EntradaPlanejador(models.Model):
     def __str__(self):
         dias = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
         return f"{dias[self.dia_semana]} {self.periodo} {self.hora}h — {self.tarefa.nome}"
+
+
+class TarefaFazer(models.Model):
+    tarefa = models.ForeignKey(
+        Tarefa, on_delete=models.CASCADE, related_name='tarefas_fazer')
+    data = models.DateField()
+
+    class Meta:
+        unique_together = ('tarefa', 'data')
+        ordering = ['data', 'tarefa__nome']
+
+    def __str__(self):
+        return f"{self.data} – {self.tarefa.nome}"

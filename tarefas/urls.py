@@ -17,5 +17,16 @@ urlpatterns = [
     path('api-dia-tarefa/', views.api_dia_tarefa, name='api-dia-tarefa'),
     path('api-deletar-dia-tarefa/', views.api_deletar_dia_tarefa,
          name='api-deletar-dia-tarefa'),
-
+    path('api-excluir-tarefa-banco/', views.api_excluir_tarefa_banco,
+         name='api-excluir-tarefa-banco'),
+    path('api-registrar-tempo-trabalhado/', views.api_registrar_tempo_trabalhado,
+         name='api-registrar-tempo-trabalhado'),
+    path('api-tarefa-fazer/', views.api_tarefa_fazer, name='api-tarefa-fazer'),
+    path('api-tarefa-fazer-list/', views.api_tarefa_fazer_list,
+         name='api-tarefa-fazer-list'),
+    path('api-tarefa-fazer-delete/', views.api_tarefa_fazer_delete,
+         name='api-tarefa-fazer-delete'),
+    path('api-tarefa-fazer-eventos/', views.api_tarefa_fazer_eventos,
+         name='api-tarefa-fazer-eventos'),
+    path('api-editar-tarefa/', views.api_editar_tarefa, name='api-editar-tarefa'),
 ]
