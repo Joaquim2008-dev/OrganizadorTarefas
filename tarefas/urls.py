@@ -29,4 +29,8 @@ urlpatterns = [
     path('api-tarefa-fazer-eventos/', views.api_tarefa_fazer_eventos,
          name='api-tarefa-fazer-eventos'),
     path('api-editar-tarefa/', views.api_editar_tarefa, name='api-editar-tarefa'),
+    path('relatorio/categorias/', views.relatorio_categorias,
+         name='relatorio_categorias'),
+    path('relatorio/tarefas/', views.relatorio_tarefas_categoria,
+         name='relatorio_tarefas_categoria'),
 ]

@@ -265,6 +265,21 @@
 
   <section class="tarefas-lista-section">
     <h2>Tarefas cadastradas</h2>
+
+    <form method="get" style="margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <label for="filtro-categoria" style="font-weight:600;color:#1f4cb9;font-size:0.85rem;">Filtrar por categoria:</label>
+      <select id="filtro-categoria" name="categoria" style="padding:6px 10px;border:1px solid #95b7ff;border-radius:8px;background:#f6f9ff;color:#1a2a54;font-size:0.88rem;">
+        <option value="">Todas</option>
+        {% for cat in categorias %}
+        <option value="{{ cat.id }}" {% if categoria_filtro == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.nome }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" style="background:#1f4cb9;color:#fff;border:none;border-radius:8px;padding:6px 16px;font-weight:700;cursor:pointer;font-size:0.85rem;">Filtrar</button>
+      {% if categoria_filtro %}
+      <a href="?" style="font-size:0.82rem;color:#dc2626;font-weight:600;">Limpar filtro</a>
+      {% endif %}
+    </form>
+
     {% if page_obj.object_list %}
     <table class="tarefas-table">
       <thead>
@@ -274,6 +289,7 @@
           <th>Categoria</th>
           <th>Prioridade</th>
           <th>Estimado</th>
+          <th>Trabalhado</th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -285,6 +301,7 @@
           <td>{{ t.categoria.nome|default:"—" }}</td>
           <td><span class="badge-prioridade {{ t.prioridade }}">{{ t.get_prioridade_display }}</span></td>
           <td>{{ t.horas_estimadas_formatadas }}</td>
+          <td>{% if t.horas_trabalhadas > 0 %}{{ t.horas_trabalhadas_formatadas }}{% else %}—{% endif %}</td>
           <td>
             <button class="btn-editar-tarefa" data-id="{{ t.id }}"
               data-nome="{{ t.nome|escapejs }}"
@@ -304,19 +321,19 @@
 
     <nav class="paginacao">
       {% if page_obj.has_previous %}
-        <a href="?page=1">&laquo;</a>
-        <a href="?page={{ page_obj.previous_page_number }}">&#8249;</a>
+        <a href="?{% if categoria_filtro %}categoria={{ categoria_filtro }}&{% endif %}page=1">&laquo;</a>
+        <a href="?{% if categoria_filtro %}categoria={{ categoria_filtro }}&{% endif %}page={{ page_obj.previous_page_number }}">&#8249;</a>
       {% endif %}
       {% for num in page_obj.paginator.page_range %}
         {% if page_obj.number == num %}
           <span class="pagina-atual">{{ num }}</span>
         {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
-          <a href="?page={{ num }}">{{ num }}</a>
+          <a href="?{% if categoria_filtro %}categoria={{ categoria_filtro }}&{% endif %}page={{ num }}">{{ num }}</a>
         {% endif %}
       {% endfor %}
       {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}">&#8250;</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}">&raquo;</a>
+        <a href="?{% if categoria_filtro %}categoria={{ categoria_filtro }}&{% endif %}page={{ page_obj.next_page_number }}">&#8250;</a>
+        <a href="?{% if categoria_filtro %}categoria={{ categoria_filtro }}&{% endif %}page={{ page_obj.paginator.num_pages }}">&raquo;</a>
       {% endif %}
     </nav>
     {% else %}

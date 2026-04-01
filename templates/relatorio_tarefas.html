@@ -1,0 +1,181 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<style>
+  .relatorio-container {
+    max-width: 960px;
+    margin: 30px auto;
+    padding: 0 16px;
+  }
+  .relatorio-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .relatorio-header h1 {
+    font-size: 1.5rem;
+    color: #1f4cb9;
+    margin: 0;
+    flex: 1;
+  }
+  .filtro-form {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    background: #f6f8ff;
+    border: 1px solid #c8d9ff;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+  }
+  .filtro-form label {
+    font-size: 0.85rem;
+    color: #586a8a;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .filtro-form input[type="date"] {
+    padding: 6px 10px;
+    border: 1px solid #c8d9ff;
+    border-radius: 6px;
+    font-size: 0.95rem;
+  }
+  .filtro-form input[type="hidden"] {
+    display: none;
+  }
+  .filtro-form button {
+    padding: 7px 18px;
+    background: #1f4cb9;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+  .filtro-form button:hover {
+    background: #163a8a;
+  }
+  .filtro-form a {
+    align-self: center;
+    font-size: 0.9rem;
+    color: #586a8a;
+    text-decoration: none;
+  }
+  .filtro-form a:hover {
+    text-decoration: underline;
+  }
+  .chart-wrapper {
+    background: #fff;
+    border: 1px solid #c8d9ff;
+    border-radius: 12px;
+    padding: 24px;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .chart-wrapper canvas {
+    width: 100% !important;
+  }
+</style>
+
+<div class="relatorio-container">
+  <div class="relatorio-header">
+    <a href="{% url 'relatorio_categorias' %}{% if data_inicio or data_fim %}?{% if data_inicio %}data_inicio={{ data_inicio }}{% endif %}{% if data_inicio and data_fim %}&{% endif %}{% if data_fim %}data_fim={{ data_fim }}{% endif %}{% endif %}" class="btn-back">← Categorias</a>
+    <h1>{{ categoria }} — Horas por Tarefa</h1>
+  </div>
+
+  <form class="filtro-form" method="get">
+    <input type="hidden" name="categoria" value="{{ categoria }}">
+    <div>
+      <label for="data_inicio">Data inicial</label>
+      <input type="date" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
+    </div>
+    <div>
+      <label for="data_fim">Data final</label>
+      <input type="date" id="data_fim" name="data_fim" value="{{ data_fim }}">
+    </div>
+    <button type="submit">Filtrar</button>
+    {% if data_inicio or data_fim %}
+    <a href="{% url 'relatorio_tarefas_categoria' %}?categoria={{ categoria|urlencode }}">Limpar filtro</a>
+    {% endif %}
+  </form>
+
+  <div class="chart-wrapper">
+    {% if has_data %}
+    <canvas id="chart-tarefas"></canvas>
+    {% else %}
+    <p style="color:#586a8a;">Nenhuma tarefa encontrada para o período selecionado.</p>
+    {% endif %}
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  const labelsData = {{ labels|safe }};
+  const valoresData = {{ valores|safe }};
+
+  function formatMinutes(m) {
+    const h = Math.floor(m / 60);
+    const min = m % 60;
+    if (h > 0 && min > 0) return h + 'h ' + min + 'm';
+    if (h > 0) return h + 'h';
+    return min + 'm';
+  }
+
+  if (labelsData.length > 0) {
+    const ctx = document.getElementById('chart-tarefas').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labelsData,
+        datasets: [{
+          label: 'Horas trabalhadas',
+          data: valoresData,
+          backgroundColor: 'rgba(31, 76, 185, 0.75)',
+          borderColor: 'rgba(31, 76, 185, 1)',
+          borderWidth: 1,
+          borderRadius: 5,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function (ctx) {
+                return ' ' + formatMinutes(ctx.parsed.x);
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: {
+              callback: function (value) {
+                return formatMinutes(value);
+              }
+            },
+            title: {
+              display: true,
+              text: 'Tempo trabalhado'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Tarefa'
+            }
+          }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}

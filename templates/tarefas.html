@@ -18,9 +18,15 @@
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'AddBtn'
+                right: 'RelatorioBtn,AddBtn'
             },
             customButtons: {
+                RelatorioBtn: {
+                    text: 'Relatório',
+                    click: function () {
+                        window.location.href = "{% url 'relatorio_categorias' %}";
+                    }
+                },
                 AddBtn: {
                     text:'+Tarefa',
                     click: function () {

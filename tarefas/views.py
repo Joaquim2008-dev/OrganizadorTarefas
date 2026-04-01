@@ -3,6 +3,7 @@ import calendar as cal_module
 from decimal import Decimal
 from datetime import datetime, date
 from django.db import IntegrityError
+from django.db.models import Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.http import JsonResponse
@@ -379,6 +380,74 @@ def api_tarefa_fazer_eventos(request):
     return JsonResponse({'success': True, 'events': result})
 
 
+def relatorio_categorias(request):
+    data_inicio = request.GET.get('data_inicio', '')
+    data_fim = request.GET.get('data_fim', '')
+
+    qs = TarefaHistorico.objects.all()
+    if data_inicio:
+        try:
+            qs = qs.filter(data_exclusao__date__gte=datetime.strptime(
+                data_inicio, '%Y-%m-%d').date())
+        except ValueError:
+            pass
+    if data_fim:
+        try:
+            qs = qs.filter(data_exclusao__date__lte=datetime.strptime(
+                data_fim, '%Y-%m-%d').date())
+        except ValueError:
+            pass
+
+    dados = list(qs.values('categoria_nome').annotate(
+        total_minutos=Sum('horas_trabalhadas')).order_by('categoria_nome'))
+    labels = [item['categoria_nome'] or 'Sem categoria' for item in dados]
+    valores = [item['total_minutos'] or 0 for item in dados]
+
+    context = {
+        'labels': json.dumps(labels),
+        'valores': json.dumps(valores),
+        'has_data': len(dados) > 0,
+        'data_inicio': data_inicio,
+        'data_fim': data_fim,
+    }
+    return render(request, 'relatorio_categorias.html', context)
+
+
+def relatorio_tarefas_categoria(request):
+    categoria = request.GET.get('categoria', '')
+    data_inicio = request.GET.get('data_inicio', '')
+    data_fim = request.GET.get('data_fim', '')
+
+    qs = TarefaHistorico.objects.filter(categoria_nome=categoria)
+    if data_inicio:
+        try:
+            qs = qs.filter(data_exclusao__date__gte=datetime.strptime(
+                data_inicio, '%Y-%m-%d').date())
+        except ValueError:
+            pass
+    if data_fim:
+        try:
+            qs = qs.filter(data_exclusao__date__lte=datetime.strptime(
+                data_fim, '%Y-%m-%d').date())
+        except ValueError:
+            pass
+
+    dados = list(qs.values('nome').annotate(total_minutos=Sum(
+        'horas_trabalhadas')).order_by('-total_minutos'))
+    labels = [item['nome'] for item in dados]
+    valores = [item['total_minutos'] or 0 for item in dados]
+
+    context = {
+        'categoria': categoria or 'Sem categoria',
+        'labels': json.dumps(labels),
+        'valores': json.dumps(valores),
+        'has_data': len(dados) > 0,
+        'data_inicio': data_inicio,
+        'data_fim': data_fim,
+    }
+    return render(request, 'relatorio_tarefas.html', context)
+
+
 def adicionar_tarefa(request, data=None):
 
     data_valida = None
@@ -446,7 +515,10 @@ def adicionar_tarefa(request, data=None):
         )
         return redirect('adicionar_tarefa')
 
+    categoria_filtro = request.GET.get('categoria', '')
     todas_tarefas = Tarefa.objects.select_related('categoria').order_by('-id')
+    if categoria_filtro:
+        todas_tarefas = todas_tarefas.filter(categoria_id=categoria_filtro)
     paginator = Paginator(todas_tarefas, 10)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
@@ -456,5 +528,6 @@ def adicionar_tarefa(request, data=None):
         'data': data_valida.isoformat() if data_valida else '',
         'page_obj': page_obj,
         'categorias': categorias,
+        'categoria_filtro': categoria_filtro,
     }
     return render(request, 'adicionar_tarefa.html', context)
