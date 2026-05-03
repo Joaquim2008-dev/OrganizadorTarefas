@@ -20,10 +20,18 @@ class Tarefa(models.Model):
         ('AL', 'Alta'),
     ]
 
+    STATUS_CHOICES = [
+        ('ES', 'Em espera'),
+        ('AN', 'Em andamento'),
+        ('CO', 'Concluída'),
+    ]
+
     nome = models.CharField(max_length=255)
     descricao = models.TextField(blank=True)
     prioridade = models.CharField(
         max_length=2, choices=PRIORIDADE_CHOICES, default='ME')
+    status = models.CharField(
+        max_length=2, choices=STATUS_CHOICES, default='ES')
     horas_estimadas = models.PositiveIntegerField(
         default=0, help_text='Minutos estimados')
     horas_trabalhadas = models.PositiveIntegerField(
@@ -131,3 +139,14 @@ class TarefaHistorico(models.Model):
 
     def __str__(self):
         return f"{self.nome} (excluída em {self.data_exclusao:%d/%m/%Y})"
+
+
+class Subtarefa(models.Model):
+    nome = models.CharField(max_length=255)
+    tarefa = models.ForeignKey(
+        Tarefa, on_delete=models.CASCADE, related_name='subtarefas')
+    tempo_trabalhado = models.PositiveIntegerField(
+        default=0, help_text='Tempo trabalhado em minutos')
+
+    def __str__(self):
+        return f"{self.nome} - {self.tarefa.nome}"

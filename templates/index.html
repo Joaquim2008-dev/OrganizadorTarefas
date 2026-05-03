@@ -5,9 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Organizador - Tarefas</title>
-    <link rel="stylesheet" href="{% static 'css/estilo.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Estilo.css' %}">
+    <link rel="stylesheet" href="{% static 'css/analise_cat.css' %}">
 </head>
-<body data-tarefa-data="{{ data|date:'Y-m-d' }}">
+<body data-tarefa-data="{{ data|date:'Y-m-d' }}" data-tarefa-id="{{ tarefa.id }}">
   <header>
 
   </header>
@@ -23,5 +24,7 @@
   <script src="{% static 'js/js_tarefa_cronograma/save-tarefa.js' %}"></script>
   <script src="{% static 'js/js_tarefa_cronograma/tarefa-menu-modal.js' %}"></script>
   <script src="{% static 'js/js_tarefa_cronograma/main.js' %}"></script>
+  <script src="{% static 'js/analise_categoria/Modal_gerar_tarefa.js' %}"></script>
+  <script src="{% static 'js/analise_categoria/load_tasks_analise.js' %}"></script>
 </body>
 </html>

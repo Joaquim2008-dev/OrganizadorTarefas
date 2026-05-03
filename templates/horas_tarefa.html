@@ -2,27 +2,49 @@
 {% load static %}
 
 {% block content %}
-<h1>Horas da Tarefa</h1>
+<div class="page-wrapper">
 
-<section class='horas-container'>
-  <header class='tarefa-detalhes'>
-    <div class='detalhe-item'>
-      <small class='item-label'>Tarefa</small>
-      <h2>{{ tarefa.nome }}</h2>
+  <div class="detalhes-col">
+    <header class='tarefa-detalhes'>
+      <div class='detalhe-item'>
+        <small class='item-label'>Tarefa</small>
+        <h2>{{ tarefa.nome }}</h2>
+      </div>
+
+      <div class='detalhe-item'>
+        <small class='item-label'>Prioridade</small>
+        <span class='prioridade-badge {{ tarefa.prioridade|lower }}'>{{ tarefa.get_prioridade_display }}</span>
+      </div>
+
+      <div class='detalhe-item'>
+        <small class='item-label'>Horas estimadas</small>
+        <span>{{ tarefa.horas_estimadas_formatadas }}</span>
+      </div>
+
+      <div class='detalhe-item'>
+        <small class='item-label'>Horas trabalhadas</small>
+        <span id="horas-trabalhadas-display">{{ tarefa.horas_trabalhadas_formatadas }}</span>
+      </div>
+    </header>
+
+    <article class="subtarefas-section">
+      <div class="add-subtarefa-box">
+        <input type="text" id="subtarefa-nome" placeholder="Nome da subtarefa...">
+        <button type="button" onclick="addSubtarefa()" class="btn-sub-add">Adicionar</button>
+      </div>
+      <div id="subtarefas-list" class="subtarefas-list">
+        <!-- Subtarefas dinâmicas via JS -->
+      </div>
+    </article>
+
+    <div class='actions-row'>
+      <a href="{% url 'tarefas' %}" class="btn-back">Home</a>
+      <a href="{% url 'editar_tarefa' tarefa.id %}" class="btn-back" style="background-color: #f59e0b;">Editar</a>
+      <a href="{% url 'tarefa_especifica' data_cronograma %}" class="btn-back">Voltar</a>
     </div>
+  </div>
 
-    <div class='detalhe-item'>
-      <small class='item-label'>Prioridade</small>
-      <span class='prioridade-badge {{ tarefa.prioridade|lower }}'>{{ tarefa.get_prioridade_display }}</span>
-    </div>
-
-    <div class='detalhe-item'>
-      <small class='item-label'>Horas estimadas</small>
-      <span>{{ tarefa.horas_estimadas_formatadas }}</span>
-    </div>
-  </header>
-
-  <main>
+  <main class='marker_hours'>
     <section class='contador'>
       <div class="relogio">
         <h3>Tempo restante</h3>
@@ -58,11 +80,8 @@
     </section>
   </main>
 
-  <div class='actions-row'>
-    <a href="{% url 'tarefas' %}" class="btn-back">Home</a>
-    <a href="{% url 'tarefa_especifica' data_cronograma %}" class="btn-back">Voltar</a>
-  </div>
-</section>
+</div>
+
 
 <script>
   /* ====== Elementos do DOM ====== */
@@ -150,63 +169,13 @@
     atualizarTempoTotal()
   }
 
-  /* ====== Registrar tempo manualmente ====== */
-  const tarefaId = {{ tarefa.id }}
-
-  function getCookie(name) {
-    const value = `; ${document.cookie}`
-    const parts = value.split(`; ${name}=`)
-    if (parts.length === 2) return parts.pop().split(';').shift()
-    return ''
-  }
-
-  const formRegistrar = document.getElementById('form-registrar-tempo')
-  const msgRegistrar = document.getElementById('msg-registrar-tempo')
-
-  formRegistrar.addEventListener('submit', (event) => {
-    event.preventDefault()
-
-    const horas = Math.max(0, parseInt(document.getElementById('input-horas').value, 10) || 0)
-    const minutos = Math.max(0, parseInt(document.getElementById('input-minutos').value, 10) || 0)
-    const totalMinutos = horas * 60 + minutos
-
-    if (totalMinutos === 0) {
-      mostrarMsg('Informe ao menos 1 minuto.', false)
-      return
-    }
-
-    fetch('{% url "api-registrar-tempo-trabalhado" %}', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCookie('csrftoken'),
-      },
-      body: JSON.stringify({ tarefa_id: tarefaId, minutos: totalMinutos }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          mostrarMsg('Tempo registrado com sucesso!', true)
-          document.getElementById('input-horas').value = 0
-          document.getElementById('input-minutos').value = 0
-        } else {
-          mostrarMsg('Falha: ' + (data.error || 'erro desconhecido'), false)
-        }
-      })
-      .catch(() => mostrarMsg('Erro de conexão.', false))
-  })
-
-  function mostrarMsg(texto, sucesso) {
-    msgRegistrar.textContent = texto
-    msgRegistrar.style.color = sucesso ? 'green' : 'red'
-    msgRegistrar.hidden = false
-    setTimeout(() => { msgRegistrar.hidden = true }, 4000)
-  }
-
   /* ====== Eventos ====== */
   btnIniciar.addEventListener('click', iniciarCronometro)
   btnPausar.addEventListener('click', pausarCronometro)
   btnResetar.addEventListener('click', resetarCronometro)
 </script>
+
+<script src="{% static 'js/horas_trabalhadas/cadastro_horas_tarefa.js' %}"></script>
+<script src="{% static 'js/horas_trabalhadas/subtarefas.js' %}"></script>
 
 {% endblock %}

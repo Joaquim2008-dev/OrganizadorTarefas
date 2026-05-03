@@ -18,9 +18,15 @@
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'RelatorioBtn,AddBtn'
+                right: 'Categorias,RelatorioBtn,AddBtn'
             },
             customButtons: {
+                Categorias:{
+                    text: 'Categorias',
+                    click: function () {
+                        window.location.href = "{% url 'analise_categoria' %}";
+                    }
+                },
                 RelatorioBtn: {
                     text: 'Relatório',
                     click: function () {

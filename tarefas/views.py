@@ -8,7 +8,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import Tarefa, DiaTarefa, EntradaPlanejador, TarefaFazer, CategoriaTarefa, TarefaHistorico
+from .models import Tarefa, DiaTarefa, EntradaPlanejador, TarefaFazer, CategoriaTarefa, TarefaHistorico, Subtarefa
+import json
 from django.core.paginator import Paginator
 
 
@@ -57,6 +58,77 @@ def horas_tarefa(request, tarefa_id):
     tarefa = get_object_or_404(Tarefa, id=tarefa_id)
     data_cronograma = request.GET.get('data', '') or str(tarefa.data)
     return render(request, 'horas_tarefa.html', {'tarefa': tarefa, 'data_cronograma': data_cronograma})
+
+
+@require_POST
+def api_add_subtarefa(request):
+    try:
+        data = json.loads(request.body)
+        tarefa_id = data.get('tarefa_id')
+        nome = data.get('nome')
+        tarefa = get_object_or_404(Tarefa, id=tarefa_id)
+        sub = Subtarefa.objects.create(tarefa=tarefa, nome=nome)
+        return JsonResponse({'success': True, 'id': sub.id})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+def api_list_subtarefas(request, tarefa_id):
+    subtarefas = Subtarefa.objects.filter(
+        tarefa_id=tarefa_id).values('id', 'nome', 'tempo_trabalhado')
+    return JsonResponse({'success': True, 'subtarefas': list(subtarefas)})
+
+
+@require_POST
+def api_update_subtarefa_tempo(request):
+    try:
+        data = json.loads(request.body)
+        sub_id = data.get('subtarefa_id')
+        novo_tempo = int(data.get('tempo_minutos') or 0)
+
+        sub = get_object_or_404(Subtarefa, id=sub_id)
+        tarefa = sub.tarefa
+
+        # Calcular a diferença para atualizar a tarefa pai
+        diferenca = novo_tempo - sub.tempo_trabalhado
+
+        # Atualizar subtarefa
+        sub.tempo_trabalhado = novo_tempo
+        sub.save()
+
+        # Atualizar tarefa pai
+        tarefa.horas_trabalhadas += diferenca
+        tarefa.save()
+
+        return JsonResponse({
+            'success': True,
+            'nova_hora_total': tarefa.horas_trabalhadas_formatadas
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@require_POST
+def api_delete_subtarefa(request):
+    try:
+        data = json.loads(request.body)
+        sub_id = data.get('subtarefa_id')
+        sub = get_object_or_404(Subtarefa, id=sub_id)
+
+        tarefa = sub.tarefa
+        tempo_remover = sub.tempo_trabalhado
+
+        # Subtrair o tempo da tarefa pai antes de deletar
+        tarefa.horas_trabalhadas -= tempo_remover
+        tarefa.save()
+
+        sub.delete()
+        return JsonResponse({
+            'success': True,
+            'nova_hora_total': tarefa.horas_trabalhadas_formatadas
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
 
 
 @require_POST
@@ -346,18 +418,31 @@ def api_editar_tarefa(request):
         tarefa.nome = payload.get('nome', tarefa.nome).strip()
         tarefa.descricao = payload.get('descricao', tarefa.descricao).strip()
         tarefa.prioridade = payload.get('prioridade', tarefa.prioridade)
-        categoria_id = payload.get('categoria_id')
+        status = payload.get('status')
+        if status:
+            tarefa.status = status
+        categoria_id = payload.get('categoria') or payload.get('categoria_id')
         tarefa.categoria_id = int(categoria_id) if categoria_id else None
-        horas = int(payload.get('horas', 0) or 0)
-        minutos = int(payload.get('minutos', 0) or 0)
+        horas = int(payload.get('horas_estimadas_horas',
+                    payload.get('horas', 0)) or 0)
+        minutos = int(payload.get('horas_estimadas_minutos',
+                      payload.get('minutos', 0)) or 0)
         horas += minutos // 60
         minutos = minutos % 60
         tarefa.horas_estimadas = horas * 60 + minutos
+        data_str = payload.get('data')
+        if data_str:
+            try:
+                tarefa.data = datetime.strptime(data_str, '%Y-%m-%d').date()
+            except ValueError:
+                pass
         tarefa.save()
         return JsonResponse({
             'success': True,
             'nome': tarefa.nome,
             'descricao': tarefa.descricao,
+            'status': tarefa.status,
+            'status_display': tarefa.get_status_display(),
             'prioridade': tarefa.prioridade,
             'prioridade_display': tarefa.get_prioridade_display(),
             'categoria_nome': tarefa.categoria.nome if tarefa.categoria else '',
@@ -448,6 +533,56 @@ def relatorio_tarefas_categoria(request):
     return render(request, 'relatorio_tarefas.html', context)
 
 
+def analise_categoria(request):
+    categorias = CategoriaTarefa.objects.all()
+    prioridades = Tarefa.PRIORIDADE_CHOICES
+    status_list = Tarefa.STATUS_CHOICES
+
+    context = {
+        'categorias': categorias,
+        'prioridades': prioridades,
+        'status_list': status_list,
+        'nomes': [c.nome for c in categorias],
+    }
+    return render(request, 'analise_categoria.html', context)
+
+
+def api_buscar_tarefas(request):
+    categoria_nome = request.GET.get('categoria')
+
+    if not categoria_nome or categoria_nome == 'nenhuma':
+        return JsonResponse({'success': True, 'tarefas': []})
+
+    tarefas = Tarefa.objects.filter(
+        categoria__nome=categoria_nome).order_by('-data')
+    data = []
+    for t in tarefas:
+        data.append({
+            'id': t.id,
+            'nome': t.nome,
+            'descricao': t.descricao,
+            'status': t.status,
+            'prioridade': t.get_prioridade_display(),
+            'categoria': t.categoria.nome if t.categoria else 'Sem categoria',
+        })
+    return JsonResponse({'success': True, 'tarefas': data})
+
+
+def editar_tarefa(request, tarefa_id):
+    tarefa = get_object_or_404(Tarefa, id=tarefa_id)
+    categorias = CategoriaTarefa.objects.all()
+    prioridades = Tarefa.PRIORIDADE_CHOICES
+    status_list = Tarefa.STATUS_CHOICES
+
+    context = {
+        'tarefa': tarefa,
+        'categorias': categorias,
+        'prioridades': prioridades,
+        'status_list': status_list,
+    }
+    return render(request, 'tarefa_editar.html', context)
+
+
 def adicionar_tarefa(request, data=None):
 
     data_valida = None
@@ -511,8 +646,11 @@ def adicionar_tarefa(request, data=None):
             horas_estimadas=minutos_estimados,
             horas_trabalhadas=0,
             data=data_obj or date.today(),
-            categoria_id=request.POST.get('categoria') or None
+            categoria_id=request.POST.get('categoria') or None,
+            status=request.POST.get('status', 'ES')
         )
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'success', 'tarefa_id': nova_tarefa.id})
         return redirect('adicionar_tarefa')
 
     categoria_filtro = request.GET.get('categoria', '')

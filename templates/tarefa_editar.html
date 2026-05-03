@@ -1,0 +1,117 @@
+{% extends 'index.html' %}
+{% load static custom_filters %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="detalhes-col" style="max-width: 600px; margin: 0 auto;">
+        <header class="tarefa-detalhes">
+            <h2>Editar Tarefa</h2>
+            <p style="color: #64748b;">Ajuste as informações da tarefa abaixo.</p>
+        </header>
+
+        <form action="{% url 'api-editar-tarefa' %}" method="POST" class="subtarefas-section" id="editTaskForm">
+            {% csrf_token %}
+            <input type="hidden" name="tarefa_id" value="{{ tarefa.id }}">
+            <input type="hidden" name="redirect_url" value="{% url 'horas_tarefa' tarefa.id %}">
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="id_nome" style="display: block; font-weight: 600; margin-bottom: 8px;">Nome</label>
+                <input type="text" name="nome" id="id_nome" value="{{ tarefa.nome }}" required
+                       style="width: 100%; padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="id_descricao" style="display: block; font-weight: 600; margin-bottom: 8px;">Descrição</label>
+                <textarea name="descricao" id="id_descricao" rows="4"
+                          style="width: 100%; padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px;">{{ tarefa.descricao }}</textarea>
+            </div>
+
+            <div class="form-row" style="display: flex; gap: 20px; margin-bottom: 20px;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="id_prioridade" style="display: block; font-weight: 600; margin-bottom: 8px;">Prioridade</label>
+                    <select name="prioridade" id="id_prioridade"
+                            style="width: 100%; padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px;">
+                        {% for val, label in prioridades %}
+                            <option value="{{ val }}" {% if tarefa.prioridade == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="id_status" style="display: block; font-weight: 600; margin-bottom: 8px;">Status</label>
+                    <select name="status" id="id_status"
+                            style="width: 100%; padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px;">
+                        {% for val, label in status_list %}
+                            <option value="{{ val }}" {% if tarefa.status == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: 600; margin-bottom: 8px;">Tempo Estimado</label>
+                <div class="time-inputs" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="number" name="horas_estimadas_horas" value="{{ tarefa.horas_estimadas|divide:60 }}" min="0"
+                           style="width: 80px; padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px;">
+                    <span>h</span>
+                    <input type="number" name="horas_estimadas_minutos" value="{{ tarefa.horas_estimadas|modulo:60 }}" min="0" max="59"
+                           style="width: 80px; padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px;">
+                    <span>m</span>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="id_categoria" style="display: block; font-weight: 600; margin-bottom: 8px;">Categoria</label>
+                <select name="categoria" id="id_categoria"
+                        style="width: 100%; padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px;">
+                    <option value="">Nenhuma</option>
+                    {% for cat in categorias %}
+                        <option value="{{ cat.id }}" {% if tarefa.categoria_id == cat.id %}selected{% endif %}>{{ cat.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 30px;">
+                <label for="id_data" style="display: block; font-weight: 600; margin-bottom: 8px;">Data</label>
+                <input type="date" name="data" id="id_data" value="{{ tarefa.data|date:'Y-m-d' }}" required
+                       style="width: 100%; padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px;">
+            </div>
+
+            <div class="actions-row">
+                <a href="{% url 'horas_tarefa' tarefa.id %}" class="btn-back">Cancelar</a>
+                <button type="submit" class="btn-sub-add" style="border: none;">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('editTaskForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = {};
+        formData.forEach((value, key) => data[key] = value);
+
+        try {
+            const response = await fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': data.csrfmiddlewaretoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                alert('Erro ao salvar: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Erro de conexão ao salvar.');
+        }
+    });
+</script>
+{% endblock %}
