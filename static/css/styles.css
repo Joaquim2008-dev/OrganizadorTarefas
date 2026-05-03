@@ -1,0 +1,836 @@
+/* -------------- CSS GLOBAL (index.html) -------------- */
+body {
+    background: white;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* -------------- Template: tarefas.html -------------- */
+
+#calendar {
+    width: calc(100vw - 40px);
+    height: calc(100vh - 60px);
+    margin: 20px auto;
+    padding: 20px;
+    background: linear-gradient(135deg, #e6eeff 0%, #d7e7ff 100%);
+    border: 1px solid #a8c7ff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(31, 76, 185, 0.15);
+    box-sizing: border-box;
+}
+
+.fc-event {
+    background: #1f4cb9 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 2px 6px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px !important;
+}
+
+.fc-event:hover {
+    background: #1441a5 !important;
+    cursor: default;
+}
+
+.fc-daygrid-event-dot {
+    display: none !important;
+}
+
+/* -------------- estilização de tarefa específica -------------- */
+
+#tarefa {
+    display: flex;
+}
+
+.cronograma-estudos {
+    max-width: 900px;
+    margin: 24px auto;
+    padding: 14px;
+    background: #f6f8ff;
+    border: 1px solid #c8d9ff;
+    border-radius: 12px;
+}
+
+.cronograma-estudos h2 {
+    margin-bottom: 10px;
+    color: #1f4cb9;
+}
+
+.cronograma-table-wrapper {
+    overflow-x: auto;
+}
+
+.cronograma-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    box-shadow: inset 0 0 0 1px #d7e4ff;
+}
+
+.cronograma-table th,
+.cronograma-table td {
+    padding: 10px 12px;
+    border: 1px solid #d5e1ff;
+    text-align: left;
+}
+
+.cronograma-table th {
+    background: #e7efff;
+    color: #1f4cb9;
+    font-weight: 700;
+}
+
+.cronograma-table tbody tr:nth-child(odd) {
+    background: #f8faff;
+}
+
+.cronograma-table tbody tr:hover {
+    background: #dde8ff;
+}
+
+.cronograma-table td#tarefa {
+    cursor: pointer;
+    color: #0f2c67;
+    font-weight: 600;
+}
+
+/* até 3 tarefas na célula */
+.task-cron {
+    min-height: 50px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    gap: 50px;
+}
+
+.atividade-task {
+    width: 500px;
+
+}
+
+
+.tarefa-item {
+    border: 1px solid #1f4cb9;
+    border-radius: 8px;
+    background: #eaf0ff;
+    padding: 10px;
+    text-align: center;
+}
+
+/*============================*/
+
+/* FullCalendar specific fit styling */
+.fc .fc-toolbar-chunk,
+.fc .fc-toolbar-title {
+    background-color: #1f4cb9;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+
+.fc .fc-toolbar .fc-button {
+    background-color: #15408c;
+    border-color: #0e2f6d;
+}
+
+.fc .fc-toolbar .fc-button:hover {
+    background-color: #10356f;
+}
+
+.fc .fc-col-header-cell {
+    background-color: #d7dae3;
+    color: #222;
+}
+
+.fc .fc-daygrid-day-frame {
+    background-color: #f4f5f8;
+    border: 1px solid #d1d4db;
+    border-radius: 8px;
+}
+
+.fc .fc-daygrid-day-top {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 6px;
+}
+
+.fc .fc-daygrid-day-number {
+    font-weight: 700;
+    color: #0f2c67;
+}
+
+/* destaque do dia atual */
+.fc .fc-day-today {
+    background-color: #c7d6f6 !important;
+    border: 2px solid #1f4cb9 !important;
+}
+
+
+
+.btn-blue {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: #1f4cb9;
+    color: #ffffff;
+    border: 1px solid #1f4cb9;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 150ms ease, transform 120ms ease;
+}
+
+.btn-blue:hover,
+.btn-blue:focus {
+    background-color: #1441a5;
+    border-color: #0f3790;
+    transform: translateY(-1px);
+}
+
+.btn-blue:active {
+    transform: translateY(0);
+}
+
+.fc .fc-toolbar-title {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.fc .fc-button {
+    color: #ffffff !important;
+    font-weight: 700;
+    background: #1f4cb9;
+    border-color: #1f4cb9;
+}
+
+.fc .fc-button,
+.fc .fc-prev-button,
+.fc .fc-next-button,
+.fc .fc-planejarBtn-button {
+    color: #ffffff !important;
+    background: #1f4cb9;
+    border-color: #1f4cb9;
+}
+
+
+.fc .fc-button,
+.fc .fc-prev-button,
+.fc .fc-next-button,
+.fc .fc-planejarBtn-button {
+    min-width: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fc .fc-button-primary:hover,
+.fc .fc-prev-button:hover,
+.fc .fc-next-button:hover,
+.fc .fc-planejarBtn-button:hover {
+    background: #1441a5;
+    border-color: #0f3790;
+    color: #fff !important;
+}
+
+.fc .fc-button .fc-icon,
+.fc .fc-button .fc-icon svg {
+    fill: #ffffff;
+}
+
+
+
+/* -------------- Template: adicionar_tarefa.html -------------- */
+.form-add {
+    max-width: 680px;
+    margin: 24px auto;
+    padding: 20px;
+    border: 1px solid #8ab6ff;
+    border-radius: 10px;
+    background-color: #eef4ff;
+}
+
+.form-add h1 {
+    color: #1f4cb9;
+    margin-bottom: 16px;
+}
+
+.form-add .form-group {
+    margin-bottom: 14px;
+}
+
+.form-add label {
+    display: block;
+    font-weight: 600;
+    color: #1f4cb9;
+    margin-bottom: 4px;
+}
+
+.form-add input,
+.form-add textarea,
+.form-add select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #95b7ff;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #1a1d22;
+}
+
+.form-add .btn-blue {
+    border: 0;
+    background-color: #1f4cb9;
+    color: #ffffff;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Estilo do modal dialog */
+dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    border: none;
+    border-radius: 12px;
+    padding: 1rem;
+    background: #ffffff;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+    min-width: 300px;
+    max-width: 90vw;
+}
+
+dialog::backdrop {
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.lista-tarefas {
+    list-style: none;
+    max-height: 260px;
+    overflow-y: auto;
+    margin: 0.8rem 0 0;
+    padding: 0;
+    border: 1px solid #c7d8ff;
+    border-radius: 8px;
+}
+
+.item-tarefa {
+    padding: 0.65rem 0.8rem;
+    border-bottom: 1px solid #eef4ff;
+    cursor: pointer;
+}
+
+.item-tarefa:last-child {
+    border-bottom: none;
+}
+
+.item-tarefa:hover {
+    background: #eef4ff;
+}
+
+.dialog-actions {
+    margin-top: 1rem;
+    text-align: right;
+}
+
+#tarefa-busca {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #95b7ff;
+    border-radius: 8px;
+    margin-top: 0.3rem;
+}
+
+
+.form-add .btn-blue:hover {
+    background-color: #1441a5;
+}
+
+
+/* -------------- Template: horas_tarefa.html -------------- */
+.page-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    align-items: stretch;
+
+}
+
+.detalhes-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background-color: #ffffff;
+    border: 1px solid #c7d8ff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(31, 76, 185, 0.08);
+}
+
+.marker_hours {
+    flex: 1;
+    background-color: #f6f9ff;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid #c7d8ff;
+    box-shadow: 0 10px 22px rgba(31, 76, 185, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tarefa-detalhes {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.detalhe-item {
+    flex: 1 1 auto;
+    min-width: 140px;
+}
+
+.detalhe-item h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.2;
+}
+
+.detalhe-item h2 small {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: #667085;
+    margin-bottom: 4px;
+}
+
+.item-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #5f6f88;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.detalhe-item span {
+    font-weight: 600;
+    color: #1d2a4a;
+}
+
+.prioridade-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    color: white;
+    font-weight: 700;
+}
+
+.prioridade-badge.ba {
+    background-color: #2f8f3f;
+}
+
+.prioridade-badge.me {
+    background-color: #f2b700;
+    color: #1f2f39;
+}
+
+.prioridade-badge.al {
+    background-color: #dc2626;
+}
+
+.actions-row {
+    display: flex;
+    justify-content: flex-start;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 16px;
+}
+
+.contador {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    margin-top: 16px;
+}
+
+.relogio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #e8efff;
+    border: 1px solid #aac8ff;
+    border-radius: 14px;
+    padding: 20px 24px;
+    min-width: 320px;
+}
+
+.relogio h3 {
+    margin: 0;
+    color: #1f4cb9;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.95rem;
+}
+
+.relogio h1 {
+    margin: 8px 0 0;
+    font-size: 4.5rem;
+    line-height: 1;
+    color: #1e4fc6;
+    font-weight: 800;
+}
+
+.escolher_tempo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+}
+
+.escolher_tempo label {
+    font-size: 0.85rem;
+    color: #2557b8;
+    font-weight: 600;
+}
+
+.escolher_tempo input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #95b7ff;
+    border-radius: 8px;
+    font-weight: 700;
+    color: #1a2a54;
+}
+
+.painel {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 440px;
+}
+
+.btn-cont {
+    border: 0;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    min-width: 104px;
+    text-transform: uppercase;
+}
+
+.btn-iniciar {
+    background: #1f4cb9;
+}
+
+.btn-pausar {
+    background: #5b82e2;
+}
+
+.btn-resetar {
+    background: #2f7ed9;
+}
+
+.btn-finalizar {
+    background: #244f9e;
+}
+
+.btn-cont:hover {
+    filter: brightness(1.06);
+}
+
+.form-registrar-tempo {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border: 1px solid #c7d8ff;
+    border-radius: 14px;
+    padding: 24px 28px;
+    box-shadow: 0 4px 16px rgba(31, 76, 185, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-registrar-tempo h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f4cb9;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: center;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #d9e6ff;
+}
+
+.form-registrar-campos {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.form-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 80px;
+    min-width: 80px;
+    max-width: 120px;
+}
+
+.form-campo label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #5f6f88;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.form-campo input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #95b7ff;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a2a54;
+    text-align: center;
+    background: #f6f9ff;
+    transition: border-color 0.2s;
+}
+
+.form-campo input[type="number"]:focus {
+    outline: none;
+    border-color: #1f4cb9;
+    background: #ffffff;
+}
+
+.btn-registrar {
+    background: #1f4cb9;
+    align-self: flex-end;
+    min-width: 110px;
+    padding: 10px 18px;
+    flex-shrink: 0;
+}
+
+.msg-registrar-tempo {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #f0f5ff;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    background: #1f4cb9;
+    color: #ffffff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: background 150ms ease;
+}
+
+.btn-back:hover {
+    background: #1441a5;
+}
+
+/* Subtarefas Styling */
+.subtarefas-section {
+    margin: 20px 0;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+}
+
+.add-subtarefa-box {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.add-subtarefa-box input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.add-subtarefa-box input:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+}
+
+.btn-sub-add {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 0 24px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-sub-add:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+.btn-sub-add:active {
+    transform: translateY(0);
+}
+
+.subtarefas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+/* Scrollbar styling for better look */
+.subtarefas-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.subtarefas-list::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.subtarefas-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.subtarefas-list::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.subtarefa-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #edf2f7;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.subtarefa-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.sub-nome {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 1rem;
+}
+
+.sub-tempo-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.sub-tempo-input input {
+    width: 60px;
+    padding: 8px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 700;
+    color: #334155;
+    transition: border-color 0.2s;
+}
+
+.sub-tempo-input input:focus {
+    border-color: #1f4cb9;
+    outline: none;
+}
+
+.btn-sub-save {
+    background-color: #1f4cb9;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-sub-save:hover {
+    background-color: #1441a5;
+    box-shadow: 0 2px 8px rgba(31, 76, 185, 0.2);
+}
+
+.btn-sub-del {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-sub-del:hover {
+    background-color: #dc2626;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
