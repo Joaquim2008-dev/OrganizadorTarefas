@@ -18,7 +18,7 @@
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'Categorias,RelatorioBtn,AdminBtn,AddBtn'
+                right: 'Categorias,RelatorioBtn,AddBtn'
             },
             customButtons: {
                 Categorias:{
@@ -31,12 +31,6 @@
                     text: 'Relatório',
                     click: function () {
                         window.location.href = "{% url 'relatorio_categorias' %}";
-                    }
-                },
-                AdminBtn: {
-                    text: 'Admin',
-                    click: function () {
-                        window.location.href = "{% url 'admin:index' %}";
                     }
                 },
                 AddBtn: {

@@ -547,6 +547,42 @@ def analise_categoria(request):
     return render(request, 'analise_categoria.html', context)
 
 
+@require_POST
+def api_criar_categoria(request):
+    try:
+        data = json.loads(request.body)
+        nome = data.get('nome')
+        if not nome:
+            return JsonResponse({'success': False, 'error': 'Nome é obrigatório.'})
+
+        if CategoriaTarefa.objects.filter(nome=nome).exists():
+            return JsonResponse({'success': False, 'error': 'Esta categoria já existe.'})
+
+        categoria = CategoriaTarefa.objects.create(nome=nome)
+        return JsonResponse({'success': True, 'id': categoria.id, 'nome': categoria.nome})
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'JSON inválido.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+def api_listar_categorias(request):
+    categorias = CategoriaTarefa.objects.all().values('id', 'nome')
+    return JsonResponse({'success': True, 'categorias': list(categorias)})
+
+
+@require_POST
+def api_excluir_categoria(request):
+    try:
+        data = json.loads(request.body)
+        cat_id = data.get('id')
+        categoria = get_object_or_404(CategoriaTarefa, id=cat_id)
+        categoria.delete()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
 def api_buscar_tarefas(request):
     categoria_nome = request.GET.get('categoria')
 
